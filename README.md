@@ -1,2 +1,2 @@
 # wobblewars
-Simple Shoote DS game.
+Simple Shooter DS game.
