@@ -1,19 +1,22 @@
 #include "weapon.h"
 #include <cmath>
 
-Weapon::Weapon(int startX, int startY) : x(startX), y(startY), thrown(false), returning(false), speed(3.0f) {}
+Weapon::Weapon(int startX, int startY) : x(startX), y(startY), thrown(false), returning(false), visible(false), speed(5.0f) {}
 
-void Weapon::throw_(int tX, int tY) {
+void Weapon::throw_(int startX, int startY, int tX, int tY) {
     if (!thrown) {
+        x = startX;
+        y = startY;
         targetX = tX;
         targetY = tY;
         thrown = true;
         returning = false;
+        visible = true;
     }
 }
 
 void Weapon::updatePosition(int ninaX, int ninaY) {
-    if (!thrown) return;
+    if (!thrown || !visible) return;
 
     int targetX = returning ? ninaX : this->targetX;
     int targetY = returning ? ninaY : this->targetY;
@@ -28,6 +31,7 @@ void Weapon::updatePosition(int ninaX, int ninaY) {
         if (returning) {
             thrown = false;
             returning = false;
+            visible = false;
         }
         else {
             returning = true;
@@ -40,5 +44,7 @@ void Weapon::updatePosition(int ninaX, int ninaY) {
 }
 
 bool Weapon::isReturning() const { return returning; }
+bool Weapon::isVisible() const { return visible; }
+void Weapon::setVisible(bool vis) { visible = vis; }
 int Weapon::getX() const { return x; }
 int Weapon::getY() const { return y; }

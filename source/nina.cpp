@@ -25,7 +25,7 @@ void Nina::move(int direction) {
 }
 
 void Nina::throwWeapon(int targetX, int targetY) {
-    weapon.throw_(targetX, targetY);
+    weapon.throw_(x, y, targetX, targetY);
 }
 
 void Nina::updateWeapon() {
@@ -40,3 +40,4 @@ void Nina::updateWeapon() {
 int Nina::getX() const { return x; }
 int Nina::getY() const { return y; }
 const Weapon& Nina::getWeapon() const { return weapon; }
+bool Nina::isWeaponVisible() const { return weapon.isVisible(); }

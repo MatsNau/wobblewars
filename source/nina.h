@@ -19,6 +19,7 @@ public:
     int getX() const;
     int getY() const;
     const Weapon& getWeapon() const;
+    bool isWeaponVisible() const;
 
     static const int UP = 0;
     static const int DOWN = 1;

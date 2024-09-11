@@ -1,6 +1,6 @@
-nina.o: C:/PersonalProj/WobbleWar/Snake-DS/source/nina.cpp \
- C:/PersonalProj/WobbleWar/Snake-DS/source/nina.h \
- C:/PersonalProj/WobbleWar/Snake-DS/source/weapon.h \
+nina.o: C:/PersonalProj/WobbleWar/WobbleWars-DS/source/nina.cpp \
+ C:/PersonalProj/WobbleWar/WobbleWars-DS/source/nina.h \
+ C:/PersonalProj/WobbleWar/WobbleWars-DS/source/weapon.h \
  C:/devkitPro/libnds/include/nds.h \
  C:/devkitPro/libnds/include/nds/libversion.h \
  C:/devkitPro/libnds/include/nds/ndstypes.h \
@@ -61,8 +61,8 @@ nina.o: C:/PersonalProj/WobbleWar/Snake-DS/source/nina.cpp \
  C:/devkitPro/libnds/include/nds/arm9/video.h \
  C:/devkitPro/libnds/include/nds/arm9/videoGL.h \
  C:/devkitPro/libnds/include/nds/arm9/nand.h
-C:/PersonalProj/WobbleWar/Snake-DS/source/nina.h:
-C:/PersonalProj/WobbleWar/Snake-DS/source/weapon.h:
+C:/PersonalProj/WobbleWar/WobbleWars-DS/source/nina.h:
+C:/PersonalProj/WobbleWar/WobbleWars-DS/source/weapon.h:
 C:/devkitPro/libnds/include/nds.h:
 C:/devkitPro/libnds/include/nds/libversion.h:
 C:/devkitPro/libnds/include/nds/ndstypes.h:

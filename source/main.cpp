@@ -31,13 +31,15 @@ int main(int argc, char** argv)
     NF_InitSpriteBuffers();
     NF_InitSpriteSys(0);
 
-    NF_LoadSpritePal("palettes/nina",0);  // Assuming Nina is 8x8 pixels
-    NF_LoadSpritePal("palettes/weapon",1);  // Assuming weapon is 8x8 pixels
+    NF_LoadSpriteGfx("sprites/tile", 0, 8, 8);
+    NF_LoadSpritePal("palettes/apple",0);  // Assuming Nina is 8x8 pixels
+    NF_LoadSpritePal("palettes/apple",1);  // Assuming weapon is 8x8 pixels
     /*NF_LoadSpritePal("palettes/nina", 0);
     NF_LoadSpritePal("palettes/weapon", 1);*/
 
     //NF_VramSpriteGfx(0, 0, 0, true);
     //NF_VramSpriteGfx(0, 1, 1, true);
+    NF_VramSpriteGfx(0, 0, 0, true);
     NF_VramSpritePal(0, 0, 0);
     NF_VramSpritePal(0, 1, 1);
 
@@ -46,6 +48,10 @@ int main(int argc, char** argv)
     NF_LoadTextFont("fonts/font", "default", 256, 256, 0);
     NF_CreateTextLayer(0, 0, 0, "default");
     //updateScore(0);  // Initialize score display
+
+    // Create sprites for Nina and the weapon
+    NF_CreateSprite(0, 0, 0, 0, nina.getX(), nina.getY());  // Nina sprite
+    NF_CreateSprite(0, 1, 0, 1, nina.getWeapon().getX(), nina.getWeapon().getY());  // Weapon sprite
 
     while (1)
     {
@@ -59,6 +65,7 @@ int main(int argc, char** argv)
         }
 
         // Handle Nina's movement
+        //TODO: ADD Diagonal Movement
         if (keysHeld() & KEY_UP)
         {
             nina.move(Nina::UP);
@@ -90,7 +97,20 @@ int main(int argc, char** argv)
 
         // Update weapon's sprite
         const Weapon& weapon = nina.getWeapon();
+        if (nina.isWeaponVisible()) {
+            NF_ShowSprite(0, 1, true);
+            NF_MoveSprite(0, 1, weapon.getX(), weapon.getY());
+        }
+        else {
+            NF_ShowSprite(0, 1, false);
+        }
         NF_MoveSprite(0, 1, weapon.getX(), weapon.getY());
+
+        //TODO: ADD ENEMIES
+        // THEY SHOULD SPAWN RANDOMLY IN AN INTERVALL OF 3 Seconds (Increasing?)
+        // THEY SHOUD TARGET THE PLAYER BY JUST MOVING TOWARDS THEM
+        // IF THEY COLLIDE WITH PLAYER => DEATH OF PLAYER
+        // IF THEY COLLIDE WITH AXE => DEATH OF NPC
 
         NF_SpriteOamSet(0);
         swiWaitForVBlank();
