@@ -7,12 +7,24 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:source\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\mainOLD.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:mainOLD.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\weapon.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:source\\weapon.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\weapon.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:source\\weapon.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\nina.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:source\\nina.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\nina.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:source\\nina.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\mainOLD.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:mainOLD.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,8 +34,47 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 23,
+          "SelectedChildIndex": 26,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "nina.h",
+              "DocumentMoniker": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\nina.h",
+              "RelativeDocumentMoniker": "source\\nina.h",
+              "ToolTip": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\nina.h",
+              "RelativeToolTip": "source\\nina.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABgAAAAeAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-09-11T20:13:44.776Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "weapon.h",
+              "DocumentMoniker": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\weapon.h",
+              "RelativeDocumentMoniker": "source\\weapon.h",
+              "ToolTip": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\weapon.h",
+              "RelativeToolTip": "source\\weapon.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAQAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-09-11T20:07:48.054Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "weapon.cpp",
+              "DocumentMoniker": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\weapon.cpp",
+              "RelativeDocumentMoniker": "source\\weapon.cpp",
+              "ToolTip": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\weapon.cpp",
+              "RelativeToolTip": "source\\weapon.cpp",
+              "ViewState": "AQIAABIAAAAAAAAAAAAAAAMAAAB3AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-09-11T20:06:03.283Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
@@ -110,26 +161,26 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "nina.cpp",
               "DocumentMoniker": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\nina.cpp",
               "RelativeDocumentMoniker": "source\\nina.cpp",
               "ToolTip": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\nina.cpp",
               "RelativeToolTip": "source\\nina.cpp",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "ViewState": "AQIAAA8AAAAAAAAAAAAAABsAAAARAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-09-06T19:28:35.908Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "mainOLD.cpp",
               "DocumentMoniker": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\mainOLD.cpp",
               "RelativeDocumentMoniker": "mainOLD.cpp",
               "ToolTip": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\mainOLD.cpp",
               "RelativeToolTip": "mainOLD.cpp",
-              "ViewState": "AQIAACoAAAAAAAAAAAAAADgAAAARAAAA",
+              "ViewState": "AQIAACoAAAAAAAAAAAAAAA0AAAAWAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-09-06T19:28:21.576Z",
               "EditorCaption": ""
@@ -142,7 +193,7 @@
               "RelativeDocumentMoniker": "source\\main.cpp",
               "ToolTip": "C:\\PersonalProj\\WobbleWar\\WobbleWars-DS\\source\\main.cpp",
               "RelativeToolTip": "source\\main.cpp",
-              "ViewState": "AQIAABIAAAAAAAAAAAAAACEAAABIAAAA",
+              "ViewState": "AQIAAE4AAAAAAAAAAAAAAHAAAAAzAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-09-06T19:26:51.242Z",
               "EditorCaption": ""
