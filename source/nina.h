@@ -7,6 +7,7 @@ class Nina {
 private:
     int x, y;
     int speed;
+    int score;
     Weapon weapon;
 
 public:
@@ -20,6 +21,9 @@ public:
     int getY() const;
     const Weapon& getWeapon() const;
     bool isWeaponVisible() const;
+
+    int getScore() const;
+    void increaseScore();
 
     static const int UP = 0;
     static const int DOWN = 1;

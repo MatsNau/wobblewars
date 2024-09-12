@@ -1,19 +1,25 @@
 #include <stdio.h>
 #include <nds.h>
 #include <nf_lib.h>
-#include "nina.h"
 
+#include <ctime>
+#include <vector>
+
+#include "nina.h"
+#include "enemy.h"
+
+#define MAX_ENEMIES 10
 Nina nina(128, 96);  // Start Nina at the center of the screen
 char score[32];
 int weaponSpriteId = 0;
 
-/*void updateScore(int score)
+void updateScore()
 {
-    sprintf(score, "SCORE: %d", score);
+    sprintf(score, "SCORE: %d", nina.getScore());
     NF_ClearTextLayer(0, 0);
     NF_WriteText(0, 0, 2, 2, score);
     NF_UpdateTextLayers();
-}*/
+}
 
 int main(int argc, char** argv)
 {
@@ -34,6 +40,7 @@ int main(int argc, char** argv)
     NF_LoadSpriteGfx("sprites/tile", 0, 8, 8);
     NF_LoadSpritePal("palettes/apple",0);  // Assuming Nina is 8x8 pixels
     NF_LoadSpritePal("palettes/apple",1);  // Assuming weapon is 8x8 pixels
+    NF_LoadSpritePal("palettes/apple", 2);
     /*NF_LoadSpritePal("palettes/nina", 0);
     NF_LoadSpritePal("palettes/weapon", 1);*/
 
@@ -42,19 +49,29 @@ int main(int argc, char** argv)
     NF_VramSpriteGfx(0, 0, 0, true);
     NF_VramSpritePal(0, 0, 0);
     NF_VramSpritePal(0, 1, 1);
+    NF_VramSpritePal(0, 2, 2);
 
     NF_InitTextSys(0);
 
     NF_LoadTextFont("fonts/font", "default", 256, 256, 0);
     NF_CreateTextLayer(0, 0, 0, "default");
-    //updateScore(0);  // Initialize score display
 
     // Create sprites for Nina and the weapon
     NF_CreateSprite(0, 0, 0, 0, nina.getX(), nina.getY());  // Nina sprite
     NF_CreateSprite(0, 1, 0, 1, nina.getWeapon().getX(), nina.getWeapon().getY());  // Weapon sprite
 
+    //Enemy Initialization
+    std::vector<Enemy> enemies(MAX_ENEMIES);
+    int enemySpawnTimer = 0;
+    const int ENEMY_SPAWN_INTERVAL = 180; // 3 seconds at 60 FPS
+
+    std::srand(std::time(0)); // Seed for random number generation
+
+
     while (1)
     {
+        //TODO: ADD START UP SCREEN WITH SOME INITIAL DIALOG
+        //TODO: ADD DEATH SCREEN AND RESET OF THE GAME
         scanKeys();
         touchPosition touch;
         touchRead(&touch);
@@ -107,10 +124,44 @@ int main(int argc, char** argv)
         NF_MoveSprite(0, 1, weapon.getX(), weapon.getY());
 
         //TODO: ADD ENEMIES
-        // THEY SHOULD SPAWN RANDOMLY IN AN INTERVALL OF 3 Seconds (Increasing?)
-        // THEY SHOUD TARGET THE PLAYER BY JUST MOVING TOWARDS THEM
         // IF THEY COLLIDE WITH PLAYER => DEATH OF PLAYER
-        // IF THEY COLLIDE WITH AXE => DEATH OF NPC
+        // Enemy spawning
+        enemySpawnTimer++;
+        if (enemySpawnTimer >= ENEMY_SPAWN_INTERVAL) {
+            for (auto& enemy : enemies) {
+                if (!enemy.isActive()) {
+                    int startX = std::rand() % 256; // Random x position
+                    int startY = std::rand() % 192; // Random y position
+                    enemy.spawn(startX, startY);
+                    NF_CreateSprite(0, 2 + (&enemy - &enemies[0]), 0, 2, enemy.getX(), enemy.getY());
+                    break;
+                }
+            }
+            enemySpawnTimer = 0;
+        }
+
+        // Enemy movement and collision detection
+        for (auto& enemy : enemies) {
+            if (enemy.isActive()) {
+                enemy.moveTowards(nina.getX(), nina.getY());
+                NF_MoveSprite(0, 2 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+
+                // Weapon collision
+                const Weapon& weapon = nina.getWeapon();
+                if (weapon.isVisible()) {
+                    int dx = enemy.getX() - weapon.getX();
+                    int dy = enemy.getY() - weapon.getY();
+                    if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
+                        enemy.setActive(false);
+                        NF_DeleteSprite(0, 2 + (&enemy - &enemies[0]));
+                        //Increase Score
+                        nina.increaseScore();
+                    }
+                }
+            }
+        }
+
+        updateScore();
 
         NF_SpriteOamSet(0);
         swiWaitForVBlank();
