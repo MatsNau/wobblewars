@@ -1,7 +1,7 @@
 #include "nina.h"
 #include <nds.h>
 
-Nina::Nina(int startX, int startY) : x(startX), y(startY), speed(2), score(0), weapon(x, y)  {}
+Nina::Nina(int startX, int startY) : x(startX), y(startY),health(5), speed(2), score(0), weapon(x, y) {}
 
 void Nina::move(int direction) 
 {
@@ -48,7 +48,13 @@ void Nina::increaseScore()
     score++;
 }
 
+void Nina::reduceHealth()
+{
+    health--;
+}
+
 int Nina::getScore() const { return score; }
+int Nina::getHealth() const { return health; }
 int Nina::getX() const { return x; }
 int Nina::getY() const { return y; }
 const Weapon& Nina::getWeapon() const { return weapon; }

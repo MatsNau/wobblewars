@@ -6,6 +6,7 @@
 class Nina {
 private:
     int x, y;
+    int health;
     int speed;
     int score;
     Weapon weapon;
@@ -24,6 +25,9 @@ public:
 
     int getScore() const;
     void increaseScore();
+
+    int getHealth() const;
+    void reduceHealth();
 
     static const int UP = 0;
     static const int DOWN = 1;

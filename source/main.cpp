@@ -11,7 +11,10 @@
 #define MAX_ENEMIES 10
 Nina nina(128, 96);  // Start Nina at the center of the screen
 char score[32];
+char health[32];
 int weaponSpriteId = 0;
+int enemySpawnTimer = 0;
+std::vector<Enemy> enemies(MAX_ENEMIES);
 
 void updateScore()
 {
@@ -19,6 +22,30 @@ void updateScore()
     NF_ClearTextLayer(0, 0);
     NF_WriteText(0, 0, 2, 2, score);
     NF_UpdateTextLayers();
+}
+
+void updateHealth()
+{
+    sprintf(health, "<3: %d", nina.getHealth());
+    NF_ClearTextLayer(0, 1);
+    NF_WriteText(0, 1, 15, 2, health);
+    NF_UpdateTextLayers();
+}
+
+void resetGame()
+{
+    for (auto &enemy : enemies)
+    {
+        if (enemy.isActive())
+        {
+            enemy.setActive(false);
+            NF_DeleteSprite(0, 2 + (&enemy - &enemies[0]));
+        }
+    }
+    nina = Nina(128, 96);
+    enemySpawnTimer = 0;
+    updateScore();
+    updateHealth();
 }
 
 int main(int argc, char** argv)
@@ -51,27 +78,35 @@ int main(int argc, char** argv)
     NF_VramSpritePal(0, 1, 1);
     NF_VramSpritePal(0, 2, 2);
 
+    //Score Initialization
     NF_InitTextSys(0);
-
     NF_LoadTextFont("fonts/font", "default", 256, 256, 0);
     NF_CreateTextLayer(0, 0, 0, "default");
+    //Health Initialization
+    NF_CreateTextLayer(0, 1, 0, "default");
 
     // Create sprites for Nina and the weapon
     NF_CreateSprite(0, 0, 0, 0, nina.getX(), nina.getY());  // Nina sprite
     NF_CreateSprite(0, 1, 0, 1, nina.getWeapon().getX(), nina.getWeapon().getY());  // Weapon sprite
 
     //Enemy Initialization
-    std::vector<Enemy> enemies(MAX_ENEMIES);
-    int enemySpawnTimer = 0;
     const int ENEMY_SPAWN_INTERVAL = 180; // 3 seconds at 60 FPS
 
     std::srand(std::time(0)); // Seed for random number generation
+
+    updateHealth();
 
 
     while (1)
     {
         //TODO: ADD START UP SCREEN WITH SOME INITIAL DIALOG
         //TODO: ADD DEATH SCREEN AND RESET OF THE GAME
+        //TODO: ADD WINNING SCREEN
+
+        //TODO: ADD SPRITES OF NINA
+        //TODO: ADD SPRITES OF AXE
+        //TODO: ADD SPRITES OF ENEMY
+        //TODO: ADD Background
         scanKeys();
         touchPosition touch;
         touchRead(&touch);
@@ -123,8 +158,6 @@ int main(int argc, char** argv)
         }
         NF_MoveSprite(0, 1, weapon.getX(), weapon.getY());
 
-        //TODO: ADD ENEMIES
-        // IF THEY COLLIDE WITH PLAYER => DEATH OF PLAYER
         // Enemy spawning
         enemySpawnTimer++;
         if (enemySpawnTimer >= ENEMY_SPAWN_INTERVAL) {
@@ -158,10 +191,28 @@ int main(int argc, char** argv)
                         nina.increaseScore();
                     }
                 }
+
+                // Nina colission
+                int dx = enemy.getX() - nina.getX();
+                int dy = enemy.getY() - nina.getY();
+                if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
+                    enemy.setActive(false);
+                    NF_DeleteSprite(0, 2 + (&enemy - &enemies[0]));
+                    //Reduce Health
+                    nina.reduceHealth();
+                }
             }
         }
 
+
+        if (nina.getHealth() <= 0)
+        {
+            //STOP THE GAME GO TO RESTART SCREEN
+            resetGame();
+        }
+
         updateScore();
+        updateHealth();
 
         NF_SpriteOamSet(0);
         swiWaitForVBlank();
