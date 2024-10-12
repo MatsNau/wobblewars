@@ -53,28 +53,46 @@ int main(int argc, char** argv)
     consoleDemoInit();
     consoleClear();
     NF_Set2D(0, 0);
+    NF_Set2D(1, 0);
     NF_SetRootFolder("NITROFS");
 
     NF_InitTiledBgBuffers();
     NF_InitTiledBgSys(0);
-
+    NF_InitTiledBgSys(1);
+    //
     NF_LoadTiledBg("backgrounds/bg", "bg", 256, 256);
     NF_CreateTiledBg(0, 3, "bg");
 
     NF_InitSpriteBuffers();
     NF_InitSpriteSys(0);
+    NF_InitSpriteSys(1);
+    
+    //Load Character Sprites
+    //Idle with Weapon
+    NF_LoadSpriteGfx("sprites/nina/idle", 0, 32, 32); // Assuming Nina is 32x32 pixels
+    NF_LoadSpritePal("sprites/nina/idle",0);  
+    NF_VramSpriteGfx(0, 0, 0, false);
+    NF_VramSpritePal(0, 0, 0);
+    //Walking with Weapon
+    //Weapon Throw
+    //Idle Without Weapon
+    //Walking without Weapon
+    //Dying
 
-    NF_LoadSpriteGfx("sprites/tile", 0, 8, 8);
-    NF_LoadSpritePal("palettes/apple",0);  // Assuming Nina is 8x8 pixels
-    NF_LoadSpritePal("palettes/apple",1);  // Assuming weapon is 8x8 pixels
+    //Load Weapon Sprites
+    //Flying 
+    NF_LoadSpriteGfx("sprites/weapon/throw", 1, 32, 32); // Assuming Nina is 32x32 pixels
+    NF_LoadSpritePal("sprites/weapon/throw", 1);
+    NF_VramSpriteGfx(0, 1, 1, false);
+    NF_VramSpritePal(0, 1, 1);
+
+    //Load Enemies
+    //Walking
+    //Dying
     NF_LoadSpritePal("palettes/apple", 2);
     /*NF_LoadSpritePal("palettes/nina", 0);
     NF_LoadSpritePal("palettes/weapon", 1);*/
 
-    //NF_VramSpriteGfx(0, 0, 0, true);
-    //NF_VramSpriteGfx(0, 1, 1, true);
-    NF_VramSpriteGfx(0, 0, 0, true);
-    NF_VramSpritePal(0, 0, 0);
     NF_VramSpritePal(0, 1, 1);
     NF_VramSpritePal(0, 2, 2);
 
@@ -87,7 +105,7 @@ int main(int argc, char** argv)
 
     // Create sprites for Nina and the weapon
     NF_CreateSprite(0, 0, 0, 0, nina.getX(), nina.getY());  // Nina sprite
-    NF_CreateSprite(0, 1, 0, 1, nina.getWeapon().getX(), nina.getWeapon().getY());  // Weapon sprite
+    NF_CreateSprite(0, 1, 1, 1, nina.getWeapon().getX(), nina.getWeapon().getY());  // Weapon sprite
 
     //Enemy Initialization
     const int ENEMY_SPAWN_INTERVAL = 180; // 3 seconds at 60 FPS
@@ -96,12 +114,22 @@ int main(int argc, char** argv)
 
     updateHealth();
 
+    //Character Animation parameters
+    int char_frame = 0;
+    int char_anim = 0;
+
+    //Weapon Animation parameters
+    int weapon_frame = 0;
+    int weapon_anim = 0;
 
     while (1)
     {
         //TODO: ADD START UP SCREEN WITH SOME INITIAL DIALOG
         //TODO: ADD DEATH SCREEN AND RESET OF THE GAME
         //TODO: ADD WINNING SCREEN
+
+        //TODO: CREATE MANAGER FOR SPRITES THAT TAKES CAR OF ANIMATIONS
+        //TODO: Extend classes by their sprites
 
         //TODO: ADD SPRITES OF NINA
         //TODO: ADD SPRITES OF AXE
@@ -135,6 +163,19 @@ int main(int argc, char** argv)
             nina.move(Nina::RIGHT);
         }
 
+        //ANIMATION TEST
+        char_anim++;
+        if (char_anim > 5)
+        {
+            char_anim = 0;
+            char_frame++;
+            if (char_frame > 3)
+                char_frame = 0;
+            NF_SpriteFrame(0, 0, char_frame);
+            
+        }
+        //ANIMTAION TEST
+
         // Handle weapon throwing
         if (keysDown() & KEY_TOUCH)
         {
@@ -152,6 +193,17 @@ int main(int argc, char** argv)
         if (nina.isWeaponVisible()) {
             NF_ShowSprite(0, 1, true);
             NF_MoveSprite(0, 1, weapon.getX(), weapon.getY());
+            //WEAPON ANIMATION TEST
+            weapon_anim++;
+            if (weapon_anim > 5)
+            {
+                weapon_anim = 0;
+                weapon_frame++;
+                if (weapon_frame > 3)
+                    weapon_frame = 0;
+                NF_SpriteFrame(0, 1, weapon_frame);
+            }
+            //WEAPON ANIMATION TEST
         }
         else {
             NF_ShowSprite(0, 1, false);
