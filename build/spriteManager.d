@@ -1,4 +1,5 @@
-main.o: C:/PersonalProj/WobbleWar/WobbleWars-DS/source/main.cpp \
+spriteManager.o: \
+ C:/PersonalProj/WobbleWar/WobbleWars-DS/source/Managers/spriteManager.cpp \
  C:/devkitPro/libnds/include/nds.h \
  C:/devkitPro/libnds/include/nds/libversion.h \
  C:/devkitPro/libnds/include/nds/ndstypes.h \
@@ -75,9 +76,6 @@ main.o: C:/PersonalProj/WobbleWar/WobbleWars-DS/source/main.cpp \
  C:/PersonalProj/WobbleWar/WobbleWars-DS/nflib/include/nf_media.h \
  C:/PersonalProj/WobbleWar/WobbleWars-DS/nflib/include/nf_3d.h \
  C:/PersonalProj/WobbleWar/WobbleWars-DS/nflib/include/nf_sprite3d.h \
- C:/PersonalProj/WobbleWar/WobbleWars-DS/source/nina.h \
- C:/PersonalProj/WobbleWar/WobbleWars-DS/source/weapon.h \
- C:/PersonalProj/WobbleWar/WobbleWars-DS/source/enemy.h \
  C:/PersonalProj/WobbleWar/WobbleWars-DS/source/Managers/spriteManager.h
 C:/devkitPro/libnds/include/nds.h:
 C:/devkitPro/libnds/include/nds/libversion.h:
@@ -155,7 +153,4 @@ C:/PersonalProj/WobbleWar/WobbleWars-DS/nflib/include/nf_sound.h:
 C:/PersonalProj/WobbleWar/WobbleWars-DS/nflib/include/nf_media.h:
 C:/PersonalProj/WobbleWar/WobbleWars-DS/nflib/include/nf_3d.h:
 C:/PersonalProj/WobbleWar/WobbleWars-DS/nflib/include/nf_sprite3d.h:
-C:/PersonalProj/WobbleWar/WobbleWars-DS/source/nina.h:
-C:/PersonalProj/WobbleWar/WobbleWars-DS/source/weapon.h:
-C:/PersonalProj/WobbleWar/WobbleWars-DS/source/enemy.h:
 C:/PersonalProj/WobbleWar/WobbleWars-DS/source/Managers/spriteManager.h:

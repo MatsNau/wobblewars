@@ -1,25 +1,20 @@
-#include <stdio.h>
-#include <nds.h>
-#include <nf_lib.h>
-
-#include <ctime>
-#include <vector>
-
-#include "nina.h"
-#include "enemy.h"
-
 #ifndef SPRITEMANAGER_H
 #define SPRITEMANAGER_H
 
-class spriteManager {
+#include <string>
+#include <vector>
+#include <iostream>
+
+class SpriteManager {
 private:
 
 public:
-	void initSprites();
-	void createSprite();
+	SpriteManager();
+	void initSprite(std::string path, int id, int size, int screen, int ram, int vram, bool keepframes, int slot);
+	void createSprite(int screen, int id, int gfx, int pal, int x, int y);
 	void removeSprite();
 	void moveSprite();
-	void animateSprite();
+	std::vector<int> animateSprite(int spritAnim, int spriteFrame, int screen, int id, int maxFrames);
 };
 
 #endif

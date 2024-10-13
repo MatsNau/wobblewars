@@ -66,8 +66,8 @@ _ADDFILES	:=	-d $(NITRO_FILES)
 #---------------------------------------------------------------------------------
 TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source
-INCLUDES	:=	include
+SOURCES		:=	source source/Managers
+INCLUDES	:=	include source/Managers
 DATA		:=	data
 NITRODATA	:=	nitrofiles
 

@@ -7,9 +7,12 @@
 
 #include "nina.h"
 #include "enemy.h"
+#include "Managers/spriteManager.h"
+//
 
 #define MAX_ENEMIES 10
 Nina nina(128, 96);  // Start Nina at the center of the screen
+SpriteManager spriteManager; //Initializing SpriteManager
 char score[32];
 char health[32];
 int weaponSpriteId = 0;
@@ -59,7 +62,7 @@ int main(int argc, char** argv)
     NF_InitTiledBgBuffers();
     NF_InitTiledBgSys(0);
     NF_InitTiledBgSys(1);
-    //
+    //Load Backgrounds
     NF_LoadTiledBg("backgrounds/bg", "bg", 256, 256);
     NF_CreateTiledBg(0, 3, "bg");
 
@@ -69,10 +72,8 @@ int main(int argc, char** argv)
     
     //Load Character Sprites
     //Idle with Weapon
-    NF_LoadSpriteGfx("sprites/nina/idle", 0, 32, 32); // Assuming Nina is 32x32 pixels
-    NF_LoadSpritePal("sprites/nina/idle",0);  
-    NF_VramSpriteGfx(0, 0, 0, false);
-    NF_VramSpritePal(0, 0, 0);
+    spriteManager.initSprite("sprites/nina/idle", 0, 32, 0, 0, 0, false, 0);
+    spriteManager.createSprite(0, 0, 0, 0, nina.getX(), nina.getY());
     //Walking with Weapon
     //Weapon Throw
     //Idle Without Weapon
@@ -81,10 +82,8 @@ int main(int argc, char** argv)
 
     //Load Weapon Sprites
     //Flying 
-    NF_LoadSpriteGfx("sprites/weapon/throw", 1, 32, 32); // Assuming Nina is 32x32 pixels
-    NF_LoadSpritePal("sprites/weapon/throw", 1);
-    NF_VramSpriteGfx(0, 1, 1, false);
-    NF_VramSpritePal(0, 1, 1);
+    spriteManager.initSprite("sprites/weapon/throw", 1, 32, 0, 1, 1, false, 1);
+    spriteManager.createSprite(0, 1, 1, 1, nina.getWeapon().getX(), nina.getWeapon().getY());
 
     //Load Enemies
     //Walking
@@ -102,10 +101,6 @@ int main(int argc, char** argv)
     NF_CreateTextLayer(0, 0, 0, "default");
     //Health Initialization
     NF_CreateTextLayer(0, 1, 0, "default");
-
-    // Create sprites for Nina and the weapon
-    NF_CreateSprite(0, 0, 0, 0, nina.getX(), nina.getY());  // Nina sprite
-    NF_CreateSprite(0, 1, 1, 1, nina.getWeapon().getX(), nina.getWeapon().getY());  // Weapon sprite
 
     //Enemy Initialization
     const int ENEMY_SPAWN_INTERVAL = 180; // 3 seconds at 60 FPS
@@ -164,16 +159,9 @@ int main(int argc, char** argv)
         }
 
         //ANIMATION TEST
-        char_anim++;
-        if (char_anim > 5)
-        {
-            char_anim = 0;
-            char_frame++;
-            if (char_frame > 3)
-                char_frame = 0;
-            NF_SpriteFrame(0, 0, char_frame);
-            
-        }
+        std::vector<int> charAnimResult = spriteManager.animateSprite(char_anim, char_frame, 0, 0, 3);
+        char_anim = charAnimResult[0];
+        char_frame = charAnimResult[1];
         //ANIMTAION TEST
 
         // Handle weapon throwing
