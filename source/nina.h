@@ -2,17 +2,33 @@
 #define NINA_H
 
 #include "weapon.h"
+#include "Managers/spriteManager.h"
 
 class Nina {
+
+public:
+    enum State {
+        IDLE_WITH_WEAPON = 0,
+        IDLE_WITHOUT_WEAPON = 1,
+        WALKING_WITH_WEAPON = 2,
+        WALKING_WITHOUT_WEAPON = 3,
+        DYING = 4,
+        // Weitere States hier hinzufügen
+    };
+
 private:
     int x, y;
     int health;
     int speed;
     int score;
     Weapon weapon;
+    int directon;
+    State currentState;
+    SpriteManager& spriteManager;
+    int currentSpriteId;
 
 public:
-    Nina(int startX, int startY);
+    Nina(int startX, int startY, SpriteManager& manager);
 
     void move(int direction);
     void throwWeapon(int targetX, int targetY);
@@ -28,6 +44,14 @@ public:
 
     int getHealth() const;
     void reduceHealth();
+
+    void updateState(State inputState);
+    void updateSprite();
+    void setDirection(int inputDirection);
+
+    int getCurrentSpriteId() const;
+
+    void reset(int startX, int startY);
 
     static const int UP = 0;
     static const int DOWN = 1;

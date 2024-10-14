@@ -1,7 +1,10 @@
 #include "nina.h"
+#include "Managers/spriteManager.h"
 #include <nds.h>
 
-Nina::Nina(int startX, int startY) : x(startX), y(startY),health(5), speed(2), score(0), weapon(x, y) {}
+Nina::Nina(int startX, int startY, SpriteManager& manager) : 
+    x(startX), y(startY),health(5), speed(2), score(0), weapon(x, y),
+    currentState(IDLE_WITH_WEAPON), spriteManager(manager), currentSpriteId(0) {}
 
 void Nina::move(int direction) 
 {
@@ -53,9 +56,48 @@ void Nina::reduceHealth()
     health--;
 }
 
+void Nina::updateState(State inputState)
+{
+    if (currentState != inputState) {
+        currentState = inputState;
+        updateSprite();
+    }
+}
+
+void Nina::updateSprite() {
+    spriteManager.hideSprite(0, currentSpriteId);
+    switch (currentState) {
+    case IDLE_WITH_WEAPON:
+        currentSpriteId = 0;
+        spriteManager.showSprite(0, currentSpriteId, x, y);
+        break;
+    case IDLE_WITHOUT_WEAPON:
+        currentSpriteId = 1;
+        spriteManager.showSprite(0, currentSpriteId, x, y);
+        break;
+        // Weitere Cases für andere States
+    }
+}
+
+/*void Nina::setDirection(int inputDirection)
+{
+    direction = inputDirection;
+}*/
+
+void Nina::reset(int startX, int startY) {
+    x = startX;
+    y = startY;
+    currentState = IDLE_WITH_WEAPON;
+    currentSpriteId = 0;
+    health = 5;
+    score = 0;
+    updateState(currentState);
+}
+
 int Nina::getScore() const { return score; }
 int Nina::getHealth() const { return health; }
 int Nina::getX() const { return x; }
 int Nina::getY() const { return y; }
 const Weapon& Nina::getWeapon() const { return weapon; }
 bool Nina::isWeaponVisible() const { return weapon.isVisible(); }
+int Nina::getCurrentSpriteId() const { return currentSpriteId; }
