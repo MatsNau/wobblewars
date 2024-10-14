@@ -74,29 +74,33 @@ int main(int argc, char** argv)
     //Idle with Weapon
     spriteManager.initSprite("sprites/nina/idle", 0, 32, 0, 0, 0, false, 0);
     spriteManager.createSprite(0, 0, 0, 0, nina.getX(), nina.getY());
-    //Walking with Weapon
-    //Weapon Throw
     //Idle Without Weapon
     spriteManager.initSprite("sprites/nina/idleWithoutWeapon", 1, 32, 0, 1, 1, false, 1);
     spriteManager.createSprite(0, 1, 1, 1, nina.getX(), nina.getY());
-    
+    spriteManager.hideSprite(0, 1);
+    //Walking with Weapon
+    spriteManager.initSprite("sprites/nina/walking", 2, 32, 0, 2, 2, false, 2);
+    spriteManager.createSprite(0, 2, 2, 2, nina.getX(), nina.getY());
+    spriteManager.hideSprite(0, 2);
     //Walking without Weapon
+    spriteManager.initSprite("sprites/nina/walkingWithoutWeapon", 3, 32, 0, 3, 3, false, 3);
+    spriteManager.createSprite(0, 3, 3, 3, nina.getX(), nina.getY());
+    spriteManager.hideSprite(0, 3);
+    //Weapon Throw
     //Dying
+    //4
 
     //Load Weapon Sprites
     //Flying 
-    spriteManager.initSprite("sprites/weapon/throw", 2, 32, 0, 2, 2, false, 2);
-    spriteManager.createSprite(0, 2, 2, 2, nina.getWeapon().getX(), nina.getWeapon().getY());
-
+    spriteManager.initSprite("sprites/weapon/throw", 5, 32, 0, 5, 5, false, 5);
+    spriteManager.createSprite(0, 5, 5, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+    spriteManager.hideSprite(0, 5);
     //Load Enemies
     //Walking
+    spriteManager.initSprite("sprites/Enemy/Ghost", 6, 32, 0, 6, 6, false, 6);
+    spriteManager.createSprite(0, 6, 6, 6, 0, 0);
+    spriteManager.hideSprite(0, 6);
     //Dying
-    NF_LoadSpritePal("palettes/apple", 3);
-    /*NF_LoadSpritePal("palettes/nina", 0);
-    NF_LoadSpritePal("palettes/weapon", 1);*/
-
-    NF_VramSpritePal(0, 1, 1);
-    NF_VramSpritePal(0, 3, 3);
 
     //Score Initialization
     NF_InitTextSys(0);
@@ -121,6 +125,7 @@ int main(int argc, char** argv)
     int weapon_anim = 0;
 
     int ninaSpriteId = 0;
+    int ninaAnimationFrames = 0;
 
     while (1)
     {
@@ -145,27 +150,32 @@ int main(int argc, char** argv)
         }
 
         ninaSpriteId = nina.getCurrentSpriteId();
+        ninaAnimationFrames = nina.getAnimationFrames();
 
         // Handle Nina's movement
         if (keysHeld() & KEY_UP)
         {
             nina.move(Nina::UP);
+            nina.setWalking(true);
         }
         else if (keysHeld() & KEY_DOWN)
         {
             nina.move(Nina::DOWN);
+            nina.setWalking(true);
         }
         else if (keysHeld() & KEY_LEFT)
         {
             nina.move(Nina::LEFT);
+            nina.setWalking(true);
         }
         else if (keysHeld() & KEY_RIGHT)
         {
             nina.move(Nina::RIGHT);
+            nina.setWalking(true);
         }
 
         //ANIMATION TEST
-        std::vector<int> charAnimResult = spriteManager.animateSprite(char_anim, char_frame, 0, ninaSpriteId, 3);
+        std::vector<int> charAnimResult = spriteManager.animateSprite(char_anim, char_frame, 0, ninaSpriteId, ninaAnimationFrames);
         char_anim = charAnimResult[0];
         char_frame = charAnimResult[1];
         //ANIMTAION TEST
@@ -182,13 +192,30 @@ int main(int argc, char** argv)
 
         // Update Nina's sprite
         spriteManager.moveSprite(0, ninaSpriteId, nina.getX(), nina.getY());
+        
+        if (nina.isWeaponVisible() && nina.getWalking())
+        {
+            nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
+        }
+        else if (nina.isWeaponVisible() && !nina.getWalking())
+        {
+            nina.updateState(Nina::IDLE_WITHOUT_WEAPON);
+        }
+        else if (!nina.isWeaponVisible() && nina.getWalking())
+        {
+            nina.updateState(Nina::WALKING_WITH_WEAPON);
+        }
+        else
+        {
+            nina.updateState(Nina::IDLE_WITH_WEAPON);
+        }
 
         // Update weapon's sprite
         const Weapon& weapon = nina.getWeapon();
-        if (nina.isWeaponVisible()) {
-            nina.updateState(Nina::IDLE_WITHOUT_WEAPON);
-            NF_ShowSprite(0, 2, true);
-            NF_MoveSprite(0, 2, weapon.getX(), weapon.getY());
+        if (nina.isWeaponVisible()) 
+        {
+            NF_ShowSprite(0, 5, true);
+            NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
             //WEAPON ANIMATION TEST
             weapon_anim++;
             if (weapon_anim > 5)
@@ -197,15 +224,16 @@ int main(int argc, char** argv)
                 weapon_frame++;
                 if (weapon_frame > 3)
                     weapon_frame = 0;
-                NF_SpriteFrame(0, 2, weapon_frame);
+                NF_SpriteFrame(0, 5, weapon_frame);
             }
             //WEAPON ANIMATION TEST
+
         }
-        else {
-            nina.updateState(Nina::IDLE_WITH_WEAPON);
-            NF_ShowSprite(0, 2, false);
+        else 
+        {
+            NF_ShowSprite(0, 5, false);
         }
-        NF_MoveSprite(0, 2, weapon.getX(), weapon.getY());
+        NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
 
         // Enemy spawning
         enemySpawnTimer++;
@@ -215,7 +243,7 @@ int main(int argc, char** argv)
                     int startX = std::rand() % 256; // Random x position
                     int startY = std::rand() % 192; // Random y position
                     enemy.spawn(startX, startY);
-                    NF_CreateSprite(0, 3 + (&enemy - &enemies[0]), 0, 3, enemy.getX(), enemy.getY());
+                    NF_CreateSprite(0, 6 + (&enemy - &enemies[0]), 6, 6, enemy.getX(), enemy.getY());
                     break;
                 }
             }
@@ -226,7 +254,7 @@ int main(int argc, char** argv)
         for (auto& enemy : enemies) {
             if (enemy.isActive()) {
                 enemy.moveTowards(nina.getX(), nina.getY());
-                NF_MoveSprite(0, 3 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+                NF_MoveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
 
                 // Weapon collision
                 const Weapon& weapon = nina.getWeapon();
@@ -235,7 +263,7 @@ int main(int argc, char** argv)
                     int dy = enemy.getY() - weapon.getY();
                     if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
                         enemy.setActive(false);
-                        NF_DeleteSprite(0, 3 + (&enemy - &enemies[0]));
+                        NF_DeleteSprite(0, 6 + (&enemy - &enemies[0]));
                         //Increase Score
                         nina.increaseScore();
                     }
@@ -246,7 +274,7 @@ int main(int argc, char** argv)
                 int dy = enemy.getY() - nina.getY();
                 if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
                     enemy.setActive(false);
-                    NF_DeleteSprite(0, 3 + (&enemy - &enemies[0]));
+                    NF_DeleteSprite(0, 6 + (&enemy - &enemies[0]));
                     //Reduce Health
                     nina.reduceHealth();
                 }
@@ -259,6 +287,8 @@ int main(int argc, char** argv)
             //STOP THE GAME GO TO RESTART SCREEN
             resetGame();
         }
+
+        nina.setWalking(false);
 
         updateScore();
         updateHealth();

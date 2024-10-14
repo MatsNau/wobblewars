@@ -26,6 +26,8 @@ private:
     State currentState;
     SpriteManager& spriteManager;
     int currentSpriteId;
+    bool isWalking;
+    int animationFrames;
 
 public:
     Nina(int startX, int startY, SpriteManager& manager);
@@ -50,6 +52,11 @@ public:
     void setDirection(int inputDirection);
 
     int getCurrentSpriteId() const;
+
+    void setWalking(bool walkingUpdate);
+    bool getWalking() const;
+
+    int getAnimationFrames() const;
 
     void reset(int startX, int startY);
 

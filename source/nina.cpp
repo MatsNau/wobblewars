@@ -3,7 +3,7 @@
 #include <nds.h>
 
 Nina::Nina(int startX, int startY, SpriteManager& manager) : 
-    x(startX), y(startY),health(5), speed(2), score(0), weapon(x, y),
+    x(startX), y(startY),health(5), speed(2), score(0), weapon(x, y), isWalking(false), animationFrames(3),
     currentState(IDLE_WITH_WEAPON), spriteManager(manager), currentSpriteId(0) {}
 
 void Nina::move(int direction) 
@@ -69,10 +69,26 @@ void Nina::updateSprite() {
     switch (currentState) {
     case IDLE_WITH_WEAPON:
         currentSpriteId = 0;
+        animationFrames = 3;
         spriteManager.showSprite(0, currentSpriteId, x, y);
         break;
     case IDLE_WITHOUT_WEAPON:
         currentSpriteId = 1;
+        animationFrames = 3;
+        spriteManager.showSprite(0, currentSpriteId, x, y);
+        break;
+    case WALKING_WITH_WEAPON:
+        currentSpriteId = 2;
+        animationFrames = 4;
+        spriteManager.showSprite(0, currentSpriteId, x, y);
+        break;
+    case WALKING_WITHOUT_WEAPON:
+        currentSpriteId = 3;
+        animationFrames = 4;
+        spriteManager.showSprite(0, currentSpriteId, x, y);
+        break;
+    case DYING:
+        currentSpriteId = 4;
         spriteManager.showSprite(0, currentSpriteId, x, y);
         break;
         // Weitere Cases für andere States
@@ -83,6 +99,11 @@ void Nina::updateSprite() {
 {
     direction = inputDirection;
 }*/
+
+void Nina::setWalking(bool walkingUpdate)
+{
+    isWalking = walkingUpdate;
+}
 
 void Nina::reset(int startX, int startY) {
     x = startX;
@@ -101,3 +122,5 @@ int Nina::getY() const { return y; }
 const Weapon& Nina::getWeapon() const { return weapon; }
 bool Nina::isWeaponVisible() const { return weapon.isVisible(); }
 int Nina::getCurrentSpriteId() const { return currentSpriteId; }
+bool Nina::getWalking() const { return isWalking; }
+int Nina::getAnimationFrames() const { return animationFrames; }
