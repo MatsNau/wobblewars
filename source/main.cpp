@@ -97,7 +97,7 @@ int main(int argc, char** argv)
     spriteManager.hideSprite(0, 5);
     //Load Enemies
     //Walking
-    spriteManager.initSprite("sprites/Enemy/Ghost", 6, 32, 0, 6, 6, false, 6);
+    spriteManager.initSprite("sprites/Enemy/chase", 6, 32, 0, 6, 6, false, 6);
     spriteManager.createSprite(0, 6, 6, 6, 0, 0);
     spriteManager.hideSprite(0, 6);
     //Dying

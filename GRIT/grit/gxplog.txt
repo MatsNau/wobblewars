@@ -1,16 +1,16 @@
 STATUS: Validatating gr.
 WARNING:   No explicit src path.
 STATUS: Validation succeeded.
-STATUS: Started run at: 2024-10-14, 20:22:47
+STATUS: Started run at: 2024-10-16, 21:56:01
 STATUS: Validatating gr.
 STATUS: Validation succeeded.
 STATUS: Preparing data.
 STATUS: Work-DIB creation.
 WARNING:   converting from 32 bpp to 8 bpp.
-WARNING:   tru/pal -> pal conversion with transp color option.
-    looking for color FF00FF in palette.
-STATUS:   Palette transparency: pal[1].
 STATUS: Work-DIB creation complete: 32x128@8.
+STATUS: Tile preparation.
+STATUS:   tiling to 8x8 tiles.
+STATUS: Tile preparation complete.
 STATUS: Graphics preparation.
 STATUS: Graphics preparation complete.
 STATUS: Palette preparation.
