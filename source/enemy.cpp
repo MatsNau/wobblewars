@@ -1,8 +1,8 @@
 #include "enemy.h"
 #include <cmath>
 
-Enemy::Enemy(SpriteManager& manager) : x(0), y(0), firstinit(true), active(false), speed(1.5f), isWalking(false), animationFrames(3),
-    currentState(CHASING), currentSpriteId(6), enemyAnim(0), enemyFrame(0), spriteManager(manager) {}
+Enemy::Enemy(SpriteManager& manager) : x(0), y(0), prevX(x), firstinit(true), active(false), speed(1.5f), isWalking(false), animationFrames(3),
+    currentState(CHASING), currentSpriteId(6), enemyAnim(0), enemyFrame(0), spriteManager(manager), toFlip(false) {}
 
 void Enemy::spawn(int startX, int startY) {
     x = startX;
@@ -12,6 +12,8 @@ void Enemy::spawn(int startX, int startY) {
 
 void Enemy::moveTowards(int targetX, int targetY) {
     if (!active) return;
+
+    prevX = x;
 
     float dx = targetX - x;
     float dy = targetY - y;
@@ -40,8 +42,8 @@ void Enemy::updateSprite( int enemyNumber ) {
         spriteManager.showSprite(0, currentSpriteId, x, y);
         break;
     case DYING:
-        currentSpriteId = 1;
-        animationFrames = 3;
+        currentSpriteId = enemyNumber+10;
+        animationFrames = 6;
         spriteManager.showSprite(0, currentSpriteId, x, y);
         break;
     }
@@ -58,10 +60,21 @@ std::vector<int> Enemy::getAnimationData()
     return {enemyAnim, enemyFrame};
 }
 
-/*void Enemy::setSpriteManager(SpriteManager& inputManager)
+bool Enemy::calcDirection()
 {
-    spriteManager = inputManager;
-}*/
+    bool shouldFlip = false;
+    if (x > prevX)
+    {
+        shouldFlip = true;
+    }
+    else if (x < prevX)
+    {
+        shouldFlip = false;
+    }
+    return shouldFlip;
+}
+
+
 
 void Enemy::firstInitialization() { firstinit = false; }
 bool Enemy::getInitializaionInfo() { return firstinit; }
@@ -70,3 +83,4 @@ void Enemy::setActive(bool status) { active = status; }
 int Enemy::getX() const { return x; }
 int Enemy::getY() const { return y; }
 int Enemy::getAnimationFrames() {return animationFrames; }
+Enemy::State Enemy::getState() {return currentState;}

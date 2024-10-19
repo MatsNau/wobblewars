@@ -12,6 +12,7 @@ public:
     };
 private:
     int x, y;
+    int prevX;
     bool active;
     float speed;
     bool firstinit;
@@ -22,6 +23,8 @@ private:
     int animationFrames;
     int enemyAnim;
     int enemyFrame;
+    bool toFlip;
+
 
 public:
     Enemy(SpriteManager& manager);
@@ -35,10 +38,12 @@ public:
     int getX() const;
     int getY() const;
     void updateState(State inputState, int enemyNumber);
+    State getState();
     void updateSprite(int enemyNumber);
     void setAnimationData(int anim, int frame);
     std::vector<int> getAnimationData();
     int getAnimationFrames();
+    bool calcDirection();
     //void setSpriteManager(SpriteManager& manager);
 };
 

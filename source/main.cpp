@@ -23,7 +23,7 @@ void updateScore()
 {
     sprintf(score, "SCORE: %d", nina.getScore());
     NF_ClearTextLayer(0, 0);
-    NF_WriteText(0, 0, 2, 2, score);
+    NF_WriteText16(0, 0, 2, 2, score);
     NF_UpdateTextLayers();
 }
 
@@ -31,7 +31,7 @@ void updateHealth()
 {
     sprintf(health, "<3: %d", nina.getHealth());
     NF_ClearTextLayer(0, 1);
-    NF_WriteText(0, 1, 15, 2, health);
+    NF_WriteText16(0, 1, 15, 2, health);
     NF_UpdateTextLayers();
 }
 
@@ -62,10 +62,13 @@ int main(int argc, char** argv)
     NF_InitTiledBgBuffers();
     NF_InitTiledBgSys(0);
     NF_InitTiledBgSys(1);
-    //Load Backgrounds
+    // Initialize DS audio hardware
+    soundEnable();
+    //Load Background
     NF_LoadTiledBg("backgrounds/bg", "bg", 256, 256);
     NF_CreateTiledBg(0, 3, "bg");
-
+    NF_LoadTiledBg("backgrounds/bg2", "bg2", 256, 256);
+    NF_CreateTiledBg(1, 3, "bg2");
     NF_InitSpriteBuffers();
     NF_InitSpriteSys(0);
     NF_InitSpriteSys(1);
@@ -101,13 +104,19 @@ int main(int argc, char** argv)
     spriteManager.createSprite(0, 6, 6, 6, 0, 0);
     spriteManager.hideSprite(0, 6);
     //Dying
+    spriteManager.initSprite("sprites/Enemy/GhostDying", 7, 32, 0, 7, 7, false, 7);
+    spriteManager.createSprite(0, 7, 7, 7, 0, 0);
+    spriteManager.hideSprite(0, 7);
+    //Load Mats
+    //Crying
+    //Happy
 
-    //Score Initialization
+    //Score Initialization//
     NF_InitTextSys(0);
-    NF_LoadTextFont("fonts/font", "default", 256, 256, 0);
-    NF_CreateTextLayer(0, 0, 0, "default");
+    NF_LoadTextFont16("fonts/font16", "default", 256, 256, 0);
+    NF_CreateTextLayer16(0, 0, 0, "default");
     //Health Initialization
-    NF_CreateTextLayer(0, 1, 0, "default");
+    NF_CreateTextLayer16(0, 1, 0, "default");
 
     //Enemy Initialization
     for (int i = 0; i < MAX_ENEMIES; ++i) {
@@ -131,6 +140,8 @@ int main(int argc, char** argv)
     int ninaSpriteId = 0;
     int ninaAnimationFrames = 0;
 
+    int flipCounter = 0;
+    bool toflip = false;
     while (1)
     {
         //TODO: ADD START UP SCREEN WITH SOME INITIAL DIALOG
@@ -195,9 +206,15 @@ int main(int argc, char** argv)
         nina.updateWeapon();
 
         //check for sprite flip
-        /*if(nina.calcDirection()){
-            spriteManager.flipSprite(0, ninaSpriteId, true);
+        /*flipCounter++;
+        if(flipCounter > 5)
+        {
+            toflip = !toflip;
+            flipCounter = 0;
+            spriteManager.flipSprite(0, nina.getCurrentSpriteId(), toflip);
         }*/
+        
+        spriteManager.flipSprite(0, ninaSpriteId, nina.calcDirection());
             
         // Update Nina's sprite
         spriteManager.moveSprite(0, ninaSpriteId, nina.getX(), nina.getY());
@@ -257,6 +274,8 @@ int main(int argc, char** argv)
                     {
                         enemy.firstInitialization();
                         NF_CreateSprite(0, 6 + (&enemy - &enemies[0]), 6, 6, enemy.getX(), enemy.getY());
+                        NF_CreateSprite(0, 16 + (&enemy - &enemies[0]), 7, 7, enemy.getX(), enemy.getY());
+                        NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
                     }
                     else
                     {
@@ -270,11 +289,12 @@ int main(int argc, char** argv)
 
         // Enemy movement and collision detection
         for (auto& enemy : enemies) {
-            if (enemy.isActive()) {
+            if (enemy.isActive() && enemy.getState() != Enemy::DYING) {
                 enemy.updateState(Enemy::CHASING, 6 + (&enemy - &enemies[0]));
                 enemy.moveTowards(nina.getX(), nina.getY());
                 spriteManager.moveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
                 //ANIMATE HERE
+                spriteManager.flipSprite(0, 6 + (&enemy - &enemies[0]), enemy.calcDirection());
                 auto animationData = enemy.getAnimationData();
                 auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 6 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
                 enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
@@ -283,8 +303,8 @@ int main(int argc, char** argv)
                 if (weapon.isVisible()) {
                     int dx = enemy.getX() - weapon.getX();
                     int dy = enemy.getY() - weapon.getY();
-                    if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
-                        enemy.setActive(false);
+                    if (dx * dx + dy * dy < 64 && enemy.getState() != Enemy::DYING) { // Assuming 8x8 sprite, so 8*8 = 64
+                        enemy.updateState(Enemy::DYING, 16 + (&enemy - &enemies[0]));
                         NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
                         //Increase Score
                         nina.increaseScore();
@@ -301,8 +321,22 @@ int main(int argc, char** argv)
                     nina.reduceHealth();
                 }
             }
-        }
+            else if(enemy.getState() == Enemy::DYING)
+            {
+                NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), true);
+                auto animationData = enemy.getAnimationData();
+                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 16 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
+                enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
+                spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+                if(animationData[1] == 6)
+                {
+                    enemy.updateState(Enemy::CHASING, 16 + (&enemy - &enemies[0]));
+                    NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
+                    enemy.setActive(false);
+                }
 
+            }
+        }
 
         if (nina.getHealth() <= 0)
         {

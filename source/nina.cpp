@@ -5,7 +5,7 @@
 Nina::Nina(int startX, int startY, SpriteManager& manager) : 
     x(startX), y(startY),health(5), speed(2), score(0), weapon(x, y), isWalking(false), animationFrames(3),
     currentState(IDLE_WITH_WEAPON), spriteManager(manager), currentSpriteId(0), playerAnim(0), playerFrame(0), toFlip(false), 
-    facingRight(true), prevX(startX) {}
+    prevX(startX) {}
 
 void Nina::move(int direction) 
 {
@@ -100,16 +100,13 @@ void Nina::updateSprite() {
 bool Nina::calcDirection()
 {
     bool shouldFlip = false;
-    if (x < prevX && facingRight)
+    if (x < prevX)
     {
-        // Wenn wir uns nach links bewegen und bisher nach rechts schauten
-        facingRight = false;
         shouldFlip = true;
     }
-    else if (x >= prevX && !facingRight)
+    else if (x > prevX)
     {
-        facingRight = true;
-        shouldFlip = true;
+        shouldFlip = false;
     }
     return shouldFlip;
 }

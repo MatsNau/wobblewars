@@ -32,7 +32,6 @@ private:
     int playerAnim;
     int playerFrame;
     bool toFlip;
-    bool facingRight;
 
 public:
     Nina(int startX, int startY, SpriteManager& manager);
