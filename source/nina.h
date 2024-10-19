@@ -13,11 +13,12 @@ public:
         WALKING_WITH_WEAPON = 2,
         WALKING_WITHOUT_WEAPON = 3,
         DYING = 4,
-        // Weitere States hier hinzufügen
+        // Weitere States hier hinzufï¿½gen
     };
 
 private:
     int x, y;
+    int prevX;
     int health;
     int speed;
     int score;
@@ -28,6 +29,10 @@ private:
     int currentSpriteId;
     bool isWalking;
     int animationFrames;
+    int playerAnim;
+    int playerFrame;
+    bool toFlip;
+    bool facingRight;
 
 public:
     Nina(int startX, int startY, SpriteManager& manager);
@@ -59,6 +64,8 @@ public:
     int getAnimationFrames() const;
 
     void reset(int startX, int startY);
+
+    bool calcDirection();
 
     static const int UP = 0;
     static const int DOWN = 1;

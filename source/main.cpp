@@ -17,7 +17,7 @@ char score[32];
 char health[32];
 int weaponSpriteId = 0;
 int enemySpawnTimer = 0;
-std::vector<Enemy> enemies(MAX_ENEMIES);
+std::vector<Enemy> enemies;
 
 void updateScore()
 {
@@ -42,7 +42,7 @@ void resetGame()
         if (enemy.isActive())
         {
             enemy.setActive(false);
-            NF_DeleteSprite(0, 2 + (&enemy - &enemies[0]));
+            NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
         }
     }
     nina.reset(128, 96);
@@ -110,6 +110,10 @@ int main(int argc, char** argv)
     NF_CreateTextLayer(0, 1, 0, "default");
 
     //Enemy Initialization
+    for (int i = 0; i < MAX_ENEMIES; ++i) {
+        Enemy enemy(spriteManager);
+        enemies.push_back(enemy);
+    }
     const int ENEMY_SPAWN_INTERVAL = 180; // 3 seconds at 60 FPS
 
     std::srand(std::time(0)); // Seed for random number generation
@@ -190,8 +194,14 @@ int main(int argc, char** argv)
         // Update weapon position
         nina.updateWeapon();
 
+        //check for sprite flip
+        /*if(nina.calcDirection()){
+            spriteManager.flipSprite(0, ninaSpriteId, true);
+        }*/
+            
         // Update Nina's sprite
         spriteManager.moveSprite(0, ninaSpriteId, nina.getX(), nina.getY());
+
         
         if (nina.isWeaponVisible() && nina.getWalking())
         {
@@ -243,7 +253,15 @@ int main(int argc, char** argv)
                     int startX = std::rand() % 256; // Random x position
                     int startY = std::rand() % 192; // Random y position
                     enemy.spawn(startX, startY);
-                    NF_CreateSprite(0, 6 + (&enemy - &enemies[0]), 6, 6, enemy.getX(), enemy.getY());
+                    if(enemy.getInitializaionInfo())
+                    {
+                        enemy.firstInitialization();
+                        NF_CreateSprite(0, 6 + (&enemy - &enemies[0]), 6, 6, enemy.getX(), enemy.getY());
+                    }
+                    else
+                    {
+                        NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), true);
+                    }
                     break;
                 }
             }
@@ -253,9 +271,13 @@ int main(int argc, char** argv)
         // Enemy movement and collision detection
         for (auto& enemy : enemies) {
             if (enemy.isActive()) {
+                enemy.updateState(Enemy::CHASING, 6 + (&enemy - &enemies[0]));
                 enemy.moveTowards(nina.getX(), nina.getY());
-                NF_MoveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
-
+                spriteManager.moveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+                //ANIMATE HERE
+                auto animationData = enemy.getAnimationData();
+                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 6 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
+                enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
                 // Weapon collision
                 const Weapon& weapon = nina.getWeapon();
                 if (weapon.isVisible()) {
@@ -263,7 +285,7 @@ int main(int argc, char** argv)
                     int dy = enemy.getY() - weapon.getY();
                     if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
                         enemy.setActive(false);
-                        NF_DeleteSprite(0, 6 + (&enemy - &enemies[0]));
+                        NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
                         //Increase Score
                         nina.increaseScore();
                     }
@@ -274,7 +296,7 @@ int main(int argc, char** argv)
                 int dy = enemy.getY() - nina.getY();
                 if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
                     enemy.setActive(false);
-                    NF_DeleteSprite(0, 6 + (&enemy - &enemies[0]));
+                    NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
                     //Reduce Health
                     nina.reduceHealth();
                 }

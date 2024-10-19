@@ -4,10 +4,12 @@
 
 Nina::Nina(int startX, int startY, SpriteManager& manager) : 
     x(startX), y(startY),health(5), speed(2), score(0), weapon(x, y), isWalking(false), animationFrames(3),
-    currentState(IDLE_WITH_WEAPON), spriteManager(manager), currentSpriteId(0) {}
+    currentState(IDLE_WITH_WEAPON), spriteManager(manager), currentSpriteId(0), playerAnim(0), playerFrame(0), toFlip(false), 
+    facingRight(true), prevX(startX) {}
 
 void Nina::move(int direction) 
 {
+    prevX = x;
     switch (direction) 
     {
         case UP:
@@ -91,14 +93,26 @@ void Nina::updateSprite() {
         currentSpriteId = 4;
         spriteManager.showSprite(0, currentSpriteId, x, y);
         break;
-        // Weitere Cases für andere States
+        // Weitere Cases fï¿½r andere States
     }
 }
 
-/*void Nina::setDirection(int inputDirection)
+bool Nina::calcDirection()
 {
-    direction = inputDirection;
-}*/
+    bool shouldFlip = false;
+    if (x < prevX && facingRight)
+    {
+        // Wenn wir uns nach links bewegen und bisher nach rechts schauten
+        facingRight = false;
+        shouldFlip = true;
+    }
+    else if (x >= prevX && !facingRight)
+    {
+        facingRight = true;
+        shouldFlip = true;
+    }
+    return shouldFlip;
+}
 
 void Nina::setWalking(bool walkingUpdate)
 {

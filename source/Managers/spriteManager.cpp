@@ -59,3 +59,8 @@ std::vector<int> SpriteManager::animateSprite(int spriteAnim, int spriteFrame, i
     return { spriteAnim, spriteFrame };
 }
 
+void SpriteManager::flipSprite(int screen, int id, bool flip)
+{
+    NF_HflipSprite(screen, id, flip);
+}
+

@@ -17,6 +17,7 @@ public:
 	void hideSprite(int screen, int id);
 	void showSprite(int screen, int id, int x, int y);
 	std::vector<int> animateSprite(int spritAnim, int spriteFrame, int screen, int id, int maxFrames);
+	void flipSprite(int screen, int id, bool flip);
 };
 
 #endif
