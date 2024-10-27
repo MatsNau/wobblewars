@@ -2,3 +2,13 @@
 .vs/
 /build
 /.vscode
+GRIT/grit/gxplog.txt
+Emulator/StateSlots/WobbleWars-DS.ds0
+Emulator/desmume.ini
+build/WobbleWars-DS.map
+build/spriteManager.o
+build/nina.o
+build/nina.d
+build/main.o
+build/enemy.o
+build/enemy.d
