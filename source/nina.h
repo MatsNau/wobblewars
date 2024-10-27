@@ -3,6 +3,7 @@
 
 #include "weapon.h"
 #include "Managers/spriteManager.h"
+#include <vector>
 
 class Nina {
 
@@ -13,6 +14,8 @@ public:
         WALKING_WITH_WEAPON = 2,
         WALKING_WITHOUT_WEAPON = 3,
         DYING = 4,
+        DYING_WITHOUT_WEAPON = 5,
+        WALKING_WITH_WEAPON_SCREEN2 = 6,
         // Weitere States hier hinzuf�gen
     };
 
@@ -32,6 +35,7 @@ private:
     int playerAnim;
     int playerFrame;
     bool toFlip;
+
 
 public:
     Nina(int startX, int startY, SpriteManager& manager);
@@ -61,6 +65,8 @@ public:
     bool getWalking() const;
 
     int getAnimationFrames() const;
+    std::vector<int> getAnimationData() const;
+    void setAnimationData(int anim, int frame);
 
     void reset(int startX, int startY);
 

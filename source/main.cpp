@@ -10,6 +10,15 @@
 #include "Managers/spriteManager.h"
 //
 
+enum GameState
+{
+    INTRO,
+    PLAYING,
+    GAMEOVER,
+    WINNING
+};
+
+GameState gameState = PLAYING;
 #define MAX_ENEMIES 10
 SpriteManager spriteManager; //Initializing SpriteManager
 Nina nina(128, 96, spriteManager);  // Start Nina at the center of the screen
@@ -18,6 +27,7 @@ char health[32];
 int weaponSpriteId = 0;
 int enemySpawnTimer = 0;
 std::vector<Enemy> enemies;
+bool gameover = false;
 
 void updateScore()
 {
@@ -35,6 +45,22 @@ void updateHealth()
     NF_UpdateTextLayers();
 }
 
+void updateScoreAndHealth()
+{
+    NF_ClearTextLayer(0, 0);  // Clear nur einmal für beide Texte
+    
+    // Score und Health in Strings formatieren
+    sprintf(score, "SCORE: %d", nina.getScore());
+    sprintf(health, "<3: %d", nina.getHealth());
+    
+    // Beide Texte auf demselben Layer schreiben
+    NF_WriteText16(0, 0, 2, 2, score);    // Links oben
+    NF_WriteText16(0, 0, 15, 2, health);  // Rechts oben
+    
+    // Layer nur einmal updaten
+    NF_UpdateTextLayers();
+}
+
 void resetGame()
 {
     for (auto &enemy : enemies)
@@ -47,8 +73,9 @@ void resetGame()
     }
     nina.reset(128, 96);
     enemySpawnTimer = 0;
-    updateScore();
-    updateHealth();
+    NF_ClearTextLayer16(0, 1);
+    NF_UpdateTextLayers();
+    updateScoreAndHealth();
 }
 
 int main(int argc, char** argv)
@@ -91,7 +118,17 @@ int main(int argc, char** argv)
     spriteManager.hideSprite(0, 3);
     //Weapon Throw
     //Dying
-    //4
+    spriteManager.initSprite("sprites/nina/Death", 4, 32, 0, 4, 4, false, 4);
+    spriteManager.createSprite(0, 4, 4, 4, nina.getX(), nina.getY());
+    spriteManager.hideSprite(0, 4);
+    //Dying without weapon
+    spriteManager.initSprite("sprites/nina/DeathWithoutWeapon", 8, 32, 0, 8, 8, false, 8);
+    spriteManager.createSprite(0, 8, 8, 8, nina.getX(), nina.getY());
+    spriteManager.hideSprite(0, 8);
+    //Walking with Weapon on Screen2
+    spriteManager.initSprite("sprites/nina/walking", 9, 32, 1, 9, 9, false, 9);
+    spriteManager.createSprite(1, 9, 9, 9, nina.getX(), nina.getY());
+    spriteManager.hideSprite(1, 9);
 
     //Load Weapon Sprites
     //Flying 
@@ -127,21 +164,16 @@ int main(int argc, char** argv)
 
     std::srand(std::time(0)); // Seed for random number generation
 
-    updateHealth();
-
-    //Character Animation parameters
-    int char_frame = 0;
-    int char_anim = 0;
+    updateScoreAndHealth();
 
     //Weapon Animation parameters
     int weapon_frame = 0;
     int weapon_anim = 0;
 
-    int ninaSpriteId = 0;
-    int ninaAnimationFrames = 0;
+    //finish coordinates
+    int finishx = 0;
+    int finishy = 0;
 
-    int flipCounter = 0;
-    bool toflip = false;
     while (1)
     {
         //TODO: ADD START UP SCREEN WITH SOME INITIAL DIALOG
@@ -158,196 +190,281 @@ int main(int argc, char** argv)
         scanKeys();
         touchPosition touch;
         touchRead(&touch);
+        if(gameover)
+        {
+            if (keysHeld() & KEY_A)
+            {
+                gameover = false;
+                gameState = PLAYING;
+                resetGame();
+            }
+        }
 
         if (keysHeld() & KEY_START)
         {
             break;
         }
-
-        ninaSpriteId = nina.getCurrentSpriteId();
-        ninaAnimationFrames = nina.getAnimationFrames();
-
-        // Handle Nina's movement
-        if (keysHeld() & KEY_UP)
-        {
-            nina.move(Nina::UP);
-            nina.setWalking(true);
-        }
-        else if (keysHeld() & KEY_DOWN)
-        {
-            nina.move(Nina::DOWN);
-            nina.setWalking(true);
-        }
-        else if (keysHeld() & KEY_LEFT)
-        {
-            nina.move(Nina::LEFT);
-            nina.setWalking(true);
-        }
-        else if (keysHeld() & KEY_RIGHT)
-        {
-            nina.move(Nina::RIGHT);
-            nina.setWalking(true);
-        }
-
-        //ANIMATION TEST
-        std::vector<int> charAnimResult = spriteManager.animateSprite(char_anim, char_frame, 0, ninaSpriteId, ninaAnimationFrames);
-        char_anim = charAnimResult[0];
-        char_frame = charAnimResult[1];
-        //ANIMTAION TEST
-
-        // Handle weapon throwing
-        if (keysDown() & KEY_TOUCH)
-        {
-            nina.throwWeapon(touch.px, touch.py);            
-        }
-
-
-        // Update weapon position
-        nina.updateWeapon();
-
-        //check for sprite flip
-        /*flipCounter++;
-        if(flipCounter > 5)
-        {
-            toflip = !toflip;
-            flipCounter = 0;
-            spriteManager.flipSprite(0, nina.getCurrentSpriteId(), toflip);
-        }*/
-        
-        spriteManager.flipSprite(0, ninaSpriteId, nina.calcDirection());
-            
-        // Update Nina's sprite
-        spriteManager.moveSprite(0, ninaSpriteId, nina.getX(), nina.getY());
-
-        
-        if (nina.isWeaponVisible() && nina.getWalking())
-        {
-            nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
-        }
-        else if (nina.isWeaponVisible() && !nina.getWalking())
-        {
-            nina.updateState(Nina::IDLE_WITHOUT_WEAPON);
-        }
-        else if (!nina.isWeaponVisible() && nina.getWalking())
-        {
-            nina.updateState(Nina::WALKING_WITH_WEAPON);
-        }
-        else
-        {
-            nina.updateState(Nina::IDLE_WITH_WEAPON);
-        }
-
-        // Update weapon's sprite
+        // Update weapon's sprites
         const Weapon& weapon = nina.getWeapon();
-        if (nina.isWeaponVisible()) 
+        // Update Nina's sprite
+        if(gameState == PLAYING)
         {
-            NF_ShowSprite(0, 5, true);
-            NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
-            //WEAPON ANIMATION TEST
-            weapon_anim++;
-            if (weapon_anim > 5)
+            // Handle Nina's movement
+            if (keysHeld() & KEY_UP)
             {
-                weapon_anim = 0;
-                weapon_frame++;
-                if (weapon_frame > 3)
-                    weapon_frame = 0;
-                NF_SpriteFrame(0, 5, weapon_frame);
+                nina.move(Nina::UP);
+                nina.setWalking(true);
             }
-            //WEAPON ANIMATION TEST
-
-        }
-        else 
-        {
-            NF_ShowSprite(0, 5, false);
-        }
-        NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
-
-        // Enemy spawning
-        enemySpawnTimer++;
-        if (enemySpawnTimer >= ENEMY_SPAWN_INTERVAL) {
-            for (auto& enemy : enemies) {
-                if (!enemy.isActive()) {
-                    int startX = std::rand() % 256; // Random x position
-                    int startY = std::rand() % 192; // Random y position
-                    enemy.spawn(startX, startY);
-                    if(enemy.getInitializaionInfo())
-                    {
-                        enemy.firstInitialization();
-                        NF_CreateSprite(0, 6 + (&enemy - &enemies[0]), 6, 6, enemy.getX(), enemy.getY());
-                        NF_CreateSprite(0, 16 + (&enemy - &enemies[0]), 7, 7, enemy.getX(), enemy.getY());
-                        NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
-                    }
-                    else
-                    {
-                        NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), true);
-                    }
-                    break;
-                }
-            }
-            enemySpawnTimer = 0;
-        }
-
-        // Enemy movement and collision detection
-        for (auto& enemy : enemies) {
-            if (enemy.isActive() && enemy.getState() != Enemy::DYING) {
-                enemy.updateState(Enemy::CHASING, 6 + (&enemy - &enemies[0]));
-                enemy.moveTowards(nina.getX(), nina.getY());
-                spriteManager.moveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
-                //ANIMATE HERE
-                spriteManager.flipSprite(0, 6 + (&enemy - &enemies[0]), enemy.calcDirection());
-                auto animationData = enemy.getAnimationData();
-                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 6 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
-                enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
-                // Weapon collision
-                const Weapon& weapon = nina.getWeapon();
-                if (weapon.isVisible()) {
-                    int dx = enemy.getX() - weapon.getX();
-                    int dy = enemy.getY() - weapon.getY();
-                    if (dx * dx + dy * dy < 64 && enemy.getState() != Enemy::DYING) { // Assuming 8x8 sprite, so 8*8 = 64
-                        enemy.updateState(Enemy::DYING, 16 + (&enemy - &enemies[0]));
-                        NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
-                        //Increase Score
-                        nina.increaseScore();
-                    }
-                }
-
-                // Nina colission
-                int dx = enemy.getX() - nina.getX();
-                int dy = enemy.getY() - nina.getY();
-                if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
-                    enemy.setActive(false);
-                    NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
-                    //Reduce Health
-                    nina.reduceHealth();
-                }
-            }
-            else if(enemy.getState() == Enemy::DYING)
+            else if (keysHeld() & KEY_DOWN)
             {
-                NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), true);
-                auto animationData = enemy.getAnimationData();
-                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 16 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
-                enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
-                spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
-                if(animationData[1] == 6)
+                nina.move(Nina::DOWN);
+                nina.setWalking(true);
+            }
+            else if (keysHeld() & KEY_LEFT)
+            {
+                nina.move(Nina::LEFT);
+                nina.setWalking(true);
+            }
+            else if (keysHeld() & KEY_RIGHT)
+            {
+                nina.move(Nina::RIGHT);
+                nina.setWalking(true);
+            }
+            
+            //ANIMATION TEST
+            auto animationData = nina.getAnimationData();
+            auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
+            nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+            //ANIMTAION TEST
+
+            // Handle weapon throwing
+            if (keysDown() & KEY_TOUCH)
+            {
+                nina.throwWeapon(touch.px, touch.py);            
+            }
+
+
+            // Update weapon position
+            nina.updateWeapon();
+            spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
+            spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
+        
+        
+            if (nina.isWeaponVisible() && nina.getWalking())
+            {
+                nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
+            }
+            else if (nina.isWeaponVisible() && !nina.getWalking())
+            {
+                nina.updateState(Nina::IDLE_WITHOUT_WEAPON);
+            }
+            else if (!nina.isWeaponVisible() && nina.getWalking())
+            {
+                nina.updateState(Nina::WALKING_WITH_WEAPON);
+            }
+            else
+            {
+                nina.updateState(Nina::IDLE_WITH_WEAPON);
+            }
+        
+            if (nina.isWeaponVisible()) 
+            {
+                NF_ShowSprite(0, 5, true);
+                NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
+                //WEAPON ANIMATION TEST
+                weapon_anim++;
+                if (weapon_anim > 5)
                 {
-                    enemy.updateState(Enemy::CHASING, 16 + (&enemy - &enemies[0]));
-                    NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
-                    enemy.setActive(false);
+                    weapon_anim = 0;
+                    weapon_frame++;
+                    if (weapon_frame > 3)
+                        weapon_frame = 0;
+                    NF_SpriteFrame(0, 5, weapon_frame);
                 }
+                //WEAPON ANIMATION TEST
 
+            }
+            else 
+            {
+                NF_ShowSprite(0, 5, false);
+            }
+            NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
+
+            // Enemy spawning
+            enemySpawnTimer++;
+            if (enemySpawnTimer >= ENEMY_SPAWN_INTERVAL) {
+                for (auto& enemy : enemies) {
+                    if (!enemy.isActive()) {
+                        int startX = std::rand() % 256; // Random x position
+                        int startY = std::rand() % 192; // Random y position
+                        enemy.spawn(startX, startY);
+                        if(enemy.getInitializaionInfo())
+                        {
+                            enemy.firstInitialization();
+                            NF_CreateSprite(0, 6 + (&enemy - &enemies[0]), 6, 6, enemy.getX(), enemy.getY());
+                            NF_CreateSprite(0, 16 + (&enemy - &enemies[0]), 7, 7, enemy.getX(), enemy.getY());
+                            NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
+                        }
+                        else
+                        {
+                            NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), true);
+                        }
+                        break;
+                    }
+                }
+                enemySpawnTimer = 0;
+            }
+
+            // Enemy movement and collision detection
+            for (auto& enemy : enemies) {
+                if (enemy.isActive() && enemy.getState() != Enemy::DYING) {
+                    enemy.updateState(Enemy::CHASING, 6 + (&enemy - &enemies[0]));
+                    enemy.moveTowards(nina.getX(), nina.getY());
+                    spriteManager.moveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+                    //ANIMATE HERE
+                    spriteManager.flipSprite(0, 6 + (&enemy - &enemies[0]), enemy.calcDirection());
+                    auto animationData = enemy.getAnimationData();
+                    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 6 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
+                    enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
+                    // Weapon collision
+                    const Weapon& weapon = nina.getWeapon();
+                    if (weapon.isVisible()) {
+                        int dx = enemy.getX() - weapon.getX();
+                        int dy = enemy.getY() - weapon.getY();
+                        if (dx * dx + dy * dy < 64 && enemy.getState() != Enemy::DYING) { // Assuming 8x8 sprite, so 8*8 = 64
+                            enemy.updateState(Enemy::DYING, 16 + (&enemy - &enemies[0]));
+                            NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
+                            //Increase Score
+                            nina.increaseScore();
+                            if(nina.getScore() >= 2)
+                            {
+                                gameState = WINNING;
+                                finishx = nina.getX();
+                                finishy = nina.getY();
+
+                            }
+                        }
+                    }
+
+                    // Nina colission
+                    int dx = enemy.getX() - nina.getX();
+                    int dy = enemy.getY() - nina.getY();
+                    if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
+                        enemy.setActive(false);
+                        NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
+                        //Reduce Health
+                        nina.reduceHealth();
+                        if(nina.getHealth() <= 0)
+                        {
+                            gameState=GAMEOVER;
+                        }
+                    }
+                }
+                else if(enemy.getState() == Enemy::DYING)
+                {
+                    NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), true);
+                    auto animationData = enemy.getAnimationData();
+                    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 16 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
+                    enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
+                    spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+                    if(animationData[1] == 6)
+                    {
+                        enemy.updateState(Enemy::CHASING, 16 + (&enemy - &enemies[0]));
+                        NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
+                        enemy.setActive(false);
+                    }
+
+                }
             }
         }
 
-        if (nina.getHealth() <= 0)
+        if (gameState == GAMEOVER)
         {
-            //STOP THE GAME GO TO RESTART SCREEN
-            resetGame();
+            //TODO: CHECK WHY PLAYER DISAPPEARS FOR ONE FRAME
+            if(weapon.isVisible())
+            {
+                nina.updateState(Nina::DYING_WITHOUT_WEAPON);
+            }
+            else
+            {
+                nina.updateState(Nina::DYING);
+            }
+            if(!gameover)
+            {
+                auto animationData = nina.getAnimationData();
+                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
+                nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+                spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
+                            //spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+                if(animationData[1] == 9 && !gameover)
+                {
+                    gameover = true;
+                    //Hide Dying Sprite
+                    spriteManager.hideSprite(0, nina.getCurrentSpriteId());
+                    // Game Over Nachricht anzeigen
+                    NF_ClearTextLayer(0,1);
+                    NF_WriteText16(0, 1, 10, 10, "GAME OVER!");
+                    NF_WriteText16(0, 1, 8, 12, "Press A to restart");
+                    NF_UpdateTextLayers();
+                    //STOP THE GAME GO TO RESTART SCREEN
+                    //resetGame();
+                }
+            }
+        }
+
+        if(gameState == WINNING)
+        {
+            //MAKE ALL ENEMIES DIE
+            /*for (auto& enemy : enemies) 
+            {
+                if (!enemy.isActive()) 
+                {
+                    enemy.updateState(Enemy::DYING, 16 + (&enemy - &enemies[0]));
+                    NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
+                    NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), true);
+                    auto animationData = enemy.getAnimationData();
+                    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 16 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
+                    enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
+                    spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+                    if(animationData[1] == 6)
+                    {
+                        enemy.updateState(Enemy::CHASING, 16 + (&enemy - &enemies[0]));
+                        NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
+                        enemy.setActive(false);
+                    }
+                }
+            }*/
+            //UPDATE NINA SPRITE
+            if(weapon.isVisible())
+            {
+                nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
+            }
+            else
+            {
+                nina.updateState(Nina::WALKING_WITH_WEAPON);
+            }
+
+            spriteManager.moveSprite(0, nina.getCurrentSpriteId(), finishx +2, finishy);
+            //ANIMATE
+            finishx = finishx + 2;
+            //TODO: WHY IS IT NOT DISAPPEARING?
+            if(nina.getX() >= 256)
+            {
+                //weapon.setVisible(false);
+                spriteManager.hideSprite(0, nina.getCurrentSpriteId());
+                //Spawn on second Screen
+                nina.updateState(Nina::WALKING_WITH_WEAPON_SCREEN2);
+
+            }
+            //TODO: ADD WINNING LOGIC HERE
+            // NINA MOVES TO THE RIGHT SIDE OF THE SCREEN DISAPPEARS AND COMES FROM THE RIGHT SIDE ON THE SECOND SCREEN
         }
 
         nina.setWalking(false);
 
-        updateScore();
-        updateHealth();
+        //updateScore();
+        //updateHealth();
+        updateScoreAndHealth();
 
         NF_SpriteOamSet(0);
         swiWaitForVBlank();
