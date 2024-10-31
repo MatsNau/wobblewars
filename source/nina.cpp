@@ -102,7 +102,8 @@ void Nina::updateSprite() {
     case WALKING_WITH_WEAPON_SCREEN2:
         currentSpriteId = 9;
         animationFrames = 4;
-        spriteManager.showSprite(1, currentSpriteId, 0, 0);
+        spriteManager.showSprite(1, currentSpriteId, x, y);
+        break;
         // Weitere Cases f�r andere States
     }
 }

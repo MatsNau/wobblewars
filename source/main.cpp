@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     NF_LoadTiledBg("backgrounds/bg", "bg", 256, 256);
     NF_CreateTiledBg(0, 3, "bg");
     NF_LoadTiledBg("backgrounds/bg2", "bg2", 256, 256);
-    NF_CreateTiledBg(1, 3, "bg2");
+    NF_CreateTiledBg(1, 1, "bg2");
     NF_InitSpriteBuffers();
     NF_InitSpriteSys(0);
     NF_InitSpriteSys(1);
@@ -145,6 +145,9 @@ int main(int argc, char** argv)
     spriteManager.createSprite(0, 7, 7, 7, 0, 0);
     spriteManager.hideSprite(0, 7);
     //Load Mats
+    spriteManager.initSprite("sprites/Enemy/GhostDying", 10, 32, 1, 10, 10, false, 10);
+    spriteManager.createSprite(1, 10, 10, 10, 128, 128);
+    //spriteManager.hideSprite(1, 10);
     //Crying
     //Happy
 
@@ -165,6 +168,8 @@ int main(int argc, char** argv)
     std::srand(std::time(0)); // Seed for random number generation
 
     updateScoreAndHealth();
+
+    bool playerLeftScreenOne = false;
 
     //Weapon Animation parameters
     int weapon_frame = 0;
@@ -190,7 +195,7 @@ int main(int argc, char** argv)
         scanKeys();
         touchPosition touch;
         touchRead(&touch);
-        if(gameover)
+        if(gameState == GAMEOVER || gameState == WINNING)
         {
             if (keysHeld() & KEY_A)
             {
@@ -405,70 +410,65 @@ int main(int argc, char** argv)
                     NF_ClearTextLayer(0,1);
                     NF_WriteText16(0, 1, 10, 10, "GAME OVER!");
                     NF_WriteText16(0, 1, 8, 12, "Press A to restart");
-                    NF_UpdateTextLayers();
-                    //STOP THE GAME GO TO RESTART SCREEN
-                    //resetGame();
                 }
             }
         }
 
         if(gameState == WINNING)
         {
-            //MAKE ALL ENEMIES DIE
-            /*for (auto& enemy : enemies) 
+            if(nina.getX() >= 255 && !playerLeftScreenOne) 
             {
-                if (!enemy.isActive()) 
-                {
-                    enemy.updateState(Enemy::DYING, 16 + (&enemy - &enemies[0]));
-                    NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
-                    NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), true);
-                    auto animationData = enemy.getAnimationData();
-                    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 16 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
-                    enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
-                    spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
-                    if(animationData[1] == 6)
-                    {
-                        enemy.updateState(Enemy::CHASING, 16 + (&enemy - &enemies[0]));
-                        NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
-                        enemy.setActive(false);
-                    }
-                }
-            }*/
+                playerLeftScreenOne = true;
+            }    
             //UPDATE NINA SPRITE
-            if(weapon.isVisible())
+            if(!playerLeftScreenOne)
             {
-                nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
-            }
-            else
-            {
-                nina.updateState(Nina::WALKING_WITH_WEAPON);
-            }
+                if(weapon.isVisible())
+                {
+                    nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
+                }
+                else
+                {
+                    nina.updateState(Nina::WALKING_WITH_WEAPON);
+                }
+                nina.move(Nina::RIGHT);
+                // Update weapon position
+                nina.updateWeapon();
+                spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
+                spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
+                //ANIMATION TEST
+                auto animationData = nina.getAnimationData();
+                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
+                nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+                //ANIMTAION TEST
 
-            spriteManager.moveSprite(0, nina.getCurrentSpriteId(), finishx +2, finishy);
-            //ANIMATE
-            finishx = finishx + 2;
-            //TODO: WHY IS IT NOT DISAPPEARING?
-            if(nina.getX() >= 256)
-            {
-                //weapon.setVisible(false);
-                spriteManager.hideSprite(0, nina.getCurrentSpriteId());
-                //Spawn on second Screen
-                nina.updateState(Nina::WALKING_WITH_WEAPON_SCREEN2);
+            } else
+            {        
+                if(nina.getX() >= 130)
+                {
+                    nina.updateState(Nina::WALKING_WITH_WEAPON_SCREEN2);
+                    nina.move(Nina::LEFT);
+                }
+                nina.updateWeapon();
+                spriteManager.flipSprite(1, nina.getCurrentSpriteId(), nina.calcDirection());
+                spriteManager.moveSprite(1, nina.getCurrentSpriteId(), nina.getX(), 128);
 
+                //ANIMATION TEST
+                auto animationData = nina.getAnimationData();
+                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 1, nina.getCurrentSpriteId(), nina.getAnimationFrames());
+                nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+                //ANIMTAION TEST
             }
-            //TODO: ADD WINNING LOGIC HERE
-            // NINA MOVES TO THE RIGHT SIDE OF THE SCREEN DISAPPEARS AND COMES FROM THE RIGHT SIDE ON THE SECOND SCREEN
         }
 
         nina.setWalking(false);
-
-        //updateScore();
-        //updateHealth();
         updateScoreAndHealth();
 
         NF_SpriteOamSet(0);
+        NF_SpriteOamSet(1);
         swiWaitForVBlank();
         oamUpdate(&oamMain);
+        oamUpdate(&oamSub);
     }
     return 0;
 }
