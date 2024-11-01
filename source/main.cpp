@@ -287,7 +287,6 @@ int main(int argc, char** argv)
                     NF_SpriteFrame(0, 5, weapon_frame);
                 }
                 //WEAPON ANIMATION TEST
-
             }
             else 
             {
@@ -386,6 +385,7 @@ int main(int argc, char** argv)
         if (gameState == GAMEOVER)
         {
             //TODO: CHECK WHY PLAYER DISAPPEARS FOR ONE FRAME
+            
             if(weapon.isVisible())
             {
                 nina.updateState(Nina::DYING_WITHOUT_WEAPON);
@@ -434,6 +434,27 @@ int main(int argc, char** argv)
                 nina.move(Nina::RIGHT);
                 // Update weapon position
                 nina.updateWeapon();
+                if (nina.isWeaponVisible()) 
+                {
+                    NF_ShowSprite(0, 5, true);
+                    NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
+                    //WEAPON ANIMATION TEST
+                    weapon_anim++;
+                    if (weapon_anim > 5)
+                    {
+                        weapon_anim = 0;
+                        weapon_frame++;
+                        if (weapon_frame > 3)
+                            weapon_frame = 0;
+                        NF_SpriteFrame(0, 5, weapon_frame);
+                }
+                    //WEAPON ANIMATION TEST
+                }
+                else 
+                {
+                    NF_ShowSprite(0, 5, false);
+                }
+            NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
                 spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
                 spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
                 //ANIMATION TEST
@@ -452,6 +473,10 @@ int main(int argc, char** argv)
                 nina.updateWeapon();
                 spriteManager.flipSprite(1, nina.getCurrentSpriteId(), nina.calcDirection());
                 spriteManager.moveSprite(1, nina.getCurrentSpriteId(), nina.getX(), 128);
+                
+                NF_ClearTextLayer(0,1);
+                NF_WriteText16(0, 1, 10, 10, "GEWONNEN!");
+                NF_WriteText16(0, 1, 8, 12, "Mats konnte gerettet werden!");
 
                 //ANIMATION TEST
                 auto animationData = nina.getAnimationData();
