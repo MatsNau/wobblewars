@@ -68,6 +68,7 @@ void Nina::updateState(State inputState)
 
 void Nina::updateSprite() {
     spriteManager.hideSprite(0, currentSpriteId);
+    spriteManager.hideSprite(1, currentSpriteId);
     switch (currentState) {
     case IDLE_WITH_WEAPON:
         currentSpriteId = 0;
@@ -104,6 +105,10 @@ void Nina::updateSprite() {
         animationFrames = 4;
         spriteManager.showSprite(1, currentSpriteId, x, y);
         break;
+    case WINNING:
+        currentSpriteId = 11;
+        animationFrames = 3;
+        spriteManager.showSprite(1, currentSpriteId, x, y);
         // Weitere Cases f�r andere States
     }
 }

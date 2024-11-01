@@ -129,6 +129,10 @@ int main(int argc, char** argv)
     spriteManager.initSprite("sprites/nina/walking", 9, 32, 1, 9, 9, false, 9);
     spriteManager.createSprite(1, 9, 9, 9, nina.getX(), nina.getY());
     spriteManager.hideSprite(1, 9);
+    //Win Screen Two
+    spriteManager.initSprite("sprites/nina/Win", 11, 32, 1, 11, 11, false, 11);
+    spriteManager.createSprite(1, 11, 11, 11, nina.getX(), nina.getY());
+    spriteManager.hideSprite(1, 11);
 
     //Load Weapon Sprites
     //Flying 
@@ -454,7 +458,7 @@ int main(int argc, char** argv)
                 {
                     NF_ShowSprite(0, 5, false);
                 }
-            NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
+                NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
                 spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
                 spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
                 //ANIMATION TEST
@@ -469,12 +473,14 @@ int main(int argc, char** argv)
                 {
                     nina.updateState(Nina::WALKING_WITH_WEAPON_SCREEN2);
                     nina.move(Nina::LEFT);
+                }else{
+                    nina.updateState(Nina::WINNING);
                 }
                 nina.updateWeapon();
                 spriteManager.flipSprite(1, nina.getCurrentSpriteId(), nina.calcDirection());
                 spriteManager.moveSprite(1, nina.getCurrentSpriteId(), nina.getX(), 128);
                 
-                NF_ClearTextLayer(0,1);
+                NF_ClearTextLayer(0, 1);
                 NF_WriteText16(0, 1, 10, 10, "GEWONNEN!");
                 NF_WriteText16(0, 1, 8, 12, "Mats konnte gerettet werden!");
 

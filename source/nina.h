@@ -16,6 +16,7 @@ public:
         DYING = 4,
         DYING_WITHOUT_WEAPON = 5,
         WALKING_WITH_WEAPON_SCREEN2 = 6,
+        WINNING = 7,
         // Weitere States hier hinzuf�gen
     };
 
