@@ -148,7 +148,7 @@ void Nina::reset(int startX, int startY) {
     y = startY;
     State inputState = IDLE_WITH_WEAPON;
     //spriteManager.hideSprite(0, currentSpriteId);
-    health = 1;
+    health = 5;
     score = 0;
     playerAnim = 0;
     playerFrame = 0;

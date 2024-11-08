@@ -21,6 +21,8 @@ enum GameState
 
 GameState gameState = PLAYING;
 #define MAX_ENEMIES 10
+#define MAX_SCORE 50
+#define MAX_HP 5
 SpriteManager spriteManager; //Initializing SpriteManager
 Nina nina(128, 128, spriteManager);  // Start Nina at the center of the screen
 victim victim(110, 128, spriteManager); //Start the victim at the center of the second scren
@@ -350,7 +352,7 @@ int main(int argc, char** argv)
                             NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
                             //Increase Score
                             nina.increaseScore();
-                            if(nina.getScore() >= 2)
+                            if(nina.getScore() >= MAX_SCORE)
                             {
                                 gameState = WINNING;
                                 finishx = nina.getX();
