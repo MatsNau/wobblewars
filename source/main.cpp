@@ -7,6 +7,7 @@
 
 #include "nina.h"
 #include "enemy.h"
+#include "victim.h"
 #include "Managers/spriteManager.h"
 //
 
@@ -21,7 +22,9 @@ enum GameState
 GameState gameState = PLAYING;
 #define MAX_ENEMIES 10
 SpriteManager spriteManager; //Initializing SpriteManager
-Nina nina(128, 96, spriteManager);  // Start Nina at the center of the screen
+Nina nina(128, 128, spriteManager);  // Start Nina at the center of the screen
+victim victim(110, 128, spriteManager); //Start the victim at the center of the second scren
+
 char score[32];
 char health[32];
 int weaponSpriteId = 0;
@@ -142,18 +145,21 @@ int main(int argc, char** argv)
     //Load Enemies
     //Walking
     spriteManager.initSprite("sprites/Enemy/chase", 6, 32, 0, 6, 6, false, 6);
-    spriteManager.createSprite(0, 6, 6, 6, 0, 0);
+    spriteManager.createSprite(0, 6, 6, 6, victim.getX(), victim.getY());
     spriteManager.hideSprite(0, 6);
     //Dying
     spriteManager.initSprite("sprites/Enemy/GhostDying", 7, 32, 0, 7, 7, false, 7);
     spriteManager.createSprite(0, 7, 7, 7, 0, 0);
     spriteManager.hideSprite(0, 7);
+    
     //Load Mats
-    spriteManager.initSprite("sprites/Enemy/GhostDying", 10, 32, 1, 10, 10, false, 10);
-    spriteManager.createSprite(1, 10, 10, 10, 128, 128);
-    //spriteManager.hideSprite(1, 10);
     //Crying
+    spriteManager.initSprite("sprites/victim/crying", 10, 32, 1, 10, 10, false, 10);
+    spriteManager.createSprite(1, 10, 10, 10, 0, 0);
     //Happy
+    spriteManager.initSprite("sprites/victim/Win", 12, 32, 1, 12, 12, false, 12);
+    spriteManager.createSprite(1, 12, 12, 12, 0, 0);
+    spriteManager.hideSprite(1,12);
 
     //Score Initialization//
     NF_InitTextSys(0);
@@ -186,16 +192,7 @@ int main(int argc, char** argv)
     while (1)
     {
         //TODO: ADD START UP SCREEN WITH SOME INITIAL DIALOG
-        //TODO: ADD DEATH SCREEN AND RESET OF THE GAME
-        //TODO: ADD WINNING SCREEN
 
-        //TODO: CREATE MANAGER FOR SPRITES THAT TAKES CARE OF ANIMATIONS
-        //TODO: Extend classes by their sprites
-
-        //TODO: ADD SPRITES OF NINA
-        //TODO: ADD SPRITES OF AXE
-        //TODO: ADD SPRITES OF ENEMY
-        //TODO: ADD Background
         scanKeys();
         touchPosition touch;
         touchRead(&touch);
@@ -215,6 +212,15 @@ int main(int argc, char** argv)
         }
         // Update weapon's sprites
         const Weapon& weapon = nina.getWeapon();
+
+        //Update Victim Sprite
+        spriteManager.moveSprite(1, victim.getCurrentSpriteId(), victim.getX(), victim.getY());
+        //ANIMATION TEST
+        auto animationData = victim.getAnimationData();
+        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 1, victim.getCurrentSpriteId(), victim.getAnimationFrames());
+        victim.setAnimationData(newAnimationData[0], newAnimationData[1]);
+        //ANIMTAION TES
+
         // Update Nina's sprite
         if(gameState == PLAYING)
         {
@@ -475,6 +481,7 @@ int main(int argc, char** argv)
                     nina.move(Nina::LEFT);
                 }else{
                     nina.updateState(Nina::WINNING);
+                    victim.updateState(victim::WINNING);
                 }
                 nina.updateWeapon();
                 spriteManager.flipSprite(1, nina.getCurrentSpriteId(), nina.calcDirection());
