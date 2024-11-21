@@ -19,7 +19,7 @@ enum GameState
     WINNING
 };
 
-GameState gameState = PLAYING;
+GameState gameState = INTRO;
 #define MAX_ENEMIES 10
 #define MAX_SCORE 50
 #define MAX_HP 5
@@ -97,8 +97,10 @@ int main(int argc, char** argv)
     // Initialize DS audio hardware
     soundEnable();
     //Load Background
+    //NF_LoadTiledBg("backgrounds/startscreen", "startscreen", 256, 256);
+    //NF_CreateTiledBg(0, 4, "startscreen");
     NF_LoadTiledBg("backgrounds/bg", "bg", 256, 256);
-    NF_CreateTiledBg(0, 3, "bg");
+    NF_CreateTiledBg(0, 2, "bg");
     NF_LoadTiledBg("backgrounds/bg2", "bg2", 256, 256);
     NF_CreateTiledBg(1, 1, "bg2");
     NF_InitSpriteBuffers();
@@ -212,6 +214,16 @@ int main(int argc, char** argv)
         {
             break;
         }
+
+        if(gameState == INTRO)
+        {
+            if(keysHeld() & KEY_A)
+            {
+                //NF_HideBg(0, 4);
+                gameState = PLAYING;
+            }
+        }
+
         // Update weapon's sprites
         const Weapon& weapon = nina.getWeapon();
 
@@ -420,8 +432,8 @@ int main(int argc, char** argv)
                     spriteManager.hideSprite(0, nina.getCurrentSpriteId());
                     // Game Over Nachricht anzeigen
                     NF_ClearTextLayer(0,1);
-                    NF_WriteText16(0, 1, 10, 10, "GAME OVER!");
-                    NF_WriteText16(0, 1, 8, 12, "Press A to restart");
+                    NF_WriteText16(0, 1, 8, 8, "GAME OVER!\n");
+                    NF_WriteText16(0, 1, 8,  10, "Press A to restart");
                 }
             }
         }
@@ -490,8 +502,8 @@ int main(int argc, char** argv)
                 spriteManager.moveSprite(1, nina.getCurrentSpriteId(), nina.getX(), 128);
                 
                 NF_ClearTextLayer(0, 1);
-                NF_WriteText16(0, 1, 10, 10, "GEWONNEN!");
-                NF_WriteText16(0, 1, 8, 12, "Mats konnte gerettet werden!");
+                NF_WriteText16(0, 1, 8, 8, "GEWONNEN! \n");
+                NF_WriteText16(0, 1, 8, 10, "Mats wurde gerettet!");
 
                 //ANIMATION TEST
                 auto animationData = nina.getAnimationData();

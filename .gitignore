@@ -12,3 +12,12 @@ build/nina.d
 build/main.o
 build/enemy.o
 build/enemy.d
+build/enemy.d
+build/enemy.o
+build/main.o
+build/nina.d
+build/nina.o
+build/spriteManager.o
+build/WobbleWars-DS.map
+Emulator/desmume.ini
+GRIT/grit/gxplog.txt
