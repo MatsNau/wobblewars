@@ -97,16 +97,22 @@ int main(int argc, char** argv)
     // Initialize DS audio hardware
     soundEnable();
     //Load Background
-    //NF_LoadTiledBg("backgrounds/startscreen", "startscreen", 256, 256);
-    //NF_CreateTiledBg(0, 4, "startscreen");
+    NF_LoadTiledBg("backgrounds/startscreen", "startscreen", 256, 256);
+    NF_CreateTiledBg(0, 0, "startscreen");
     NF_LoadTiledBg("backgrounds/bg", "bg", 256, 256);
-    NF_CreateTiledBg(0, 2, "bg");
+    NF_CreateTiledBg(0, 3, "bg");
     NF_LoadTiledBg("backgrounds/bg2", "bg2", 256, 256);
-    NF_CreateTiledBg(1, 1, "bg2");
+    NF_CreateTiledBg(1, 0, "bg2");
+    
+    //Sound//
+    // Initialize audio buffers
+    NF_InitRawSoundBuffers();
+    // Load audio files from NitroFS
+    NF_LoadRawSound("sounds/output", 0, 5512, 0);
+
     NF_InitSpriteBuffers();
     NF_InitSpriteSys(0);
     NF_InitSpriteSys(1);
-    
     //Load Character Sprites
     //Idle with Weapon
     spriteManager.initSprite("sprites/nina/idle", 0, 32, 0, 0, 0, false, 0);
@@ -219,8 +225,9 @@ int main(int argc, char** argv)
         {
             if(keysHeld() & KEY_A)
             {
-                //NF_HideBg(0, 4);
                 gameState = PLAYING;
+                // Start background music
+                u8 sound_id = NF_PlayRawSound(0, 127, 64, true, 0);
             }
         }
 
