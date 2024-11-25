@@ -202,7 +202,8 @@ int main(int argc, char** argv)
     while (1)
     {
         //TODO: ADD START UP SCREEN WITH SOME INITIAL DIALOG
-
+        //TODO: Add A Heart Item that gives you health
+        //TODO: Sound Mangement: Start, Music on play, test for sounds for walking, and killing enemies, maybe dying.
         scanKeys();
         touchPosition touch;
         touchRead(&touch);
