@@ -109,6 +109,7 @@ int main(int argc, char** argv)
     NF_InitRawSoundBuffers();
     // Load audio files from NitroFS
     NF_LoadRawSound("sounds/output", 0, 5512, 0);
+    //NF_LoadRawSound("sounds/walking", 1, 44100, 0);
 
     NF_InitSpriteBuffers();
     NF_InitSpriteSys(0);
@@ -195,7 +196,7 @@ int main(int argc, char** argv)
     int weapon_frame = 0;
     int weapon_anim = 0;
 
-    //finish coordinates
+    //finish coordinates//
     int finishx = 0;
     int finishy = 0;
 
@@ -219,7 +220,7 @@ int main(int argc, char** argv)
 
         if (keysHeld() & KEY_START)
         {
-            break;
+            exit(0);
         }
 
         if(gameState == INTRO)
@@ -251,23 +252,37 @@ int main(int argc, char** argv)
             {
                 nina.move(Nina::UP);
                 nina.setWalking(true);
+                //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
             }
             else if (keysHeld() & KEY_DOWN)
             {
                 nina.move(Nina::DOWN);
                 nina.setWalking(true);
+                //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
             }
             else if (keysHeld() & KEY_LEFT)
             {
                 nina.move(Nina::LEFT);
                 nina.setWalking(true);
+                //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
             }
             else if (keysHeld() & KEY_RIGHT)
             {
                 nina.move(Nina::RIGHT);
                 nina.setWalking(true);
+                //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
             }
-            
+            //
+            //Walking sound
+            /*if(nina.isWalking() && !playWalkingSound)
+            {
+                //u8 sound_id = NF_PlayRawSound(1, 64, true, 0);
+                playWalkingSound = true;
+            }
+            else if(!nina.isWalking() && playWalkingSound)
+            {
+            }*/
+
             //ANIMATION TEST
             auto animationData = nina.getAnimationData();
             auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
