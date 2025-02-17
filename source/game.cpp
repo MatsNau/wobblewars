@@ -125,21 +125,20 @@ int Game::Initialize()
         Enemy enemy(spriteManager);
         enemies.push_back(enemy);
     }
-    const int ENEMY_SPAWN_INTERVAL = 180; // 3 seconds at 60 FPS
 
     std::srand(std::time(0)); // Seed for random number generation
 
     UpdateScoreAndHealth();
 
-    bool playerLeftScreenOne = false;
+    playerLeftScreenOne = false;
 
     //Weapon Animation parameters
-    int weapon_frame = 0;
-    int weapon_anim = 0;
+    weapon_frame = 0;
+    weapon_anim = 0;
 
     //finish coordinates//
-    int finishx = 0;
-    int finishy = 0;
+    finishx = 0;
+    finishy = 0;
     
     return 0;
 }
@@ -387,14 +386,14 @@ int Game::Run()
             {
                 nina.updateState(Nina::DYING);
             }
-            if(gameover)
+            if(!gameover)
             {
                 auto animationData = nina.getAnimationData();
                 auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
                 nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
                 spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
                             //spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
-                if(animationData[1] == 9 && gameover)
+                if(animationData[1] == 9 && !gameover)
                 {
                     gameover = true;
                     //Hide Dying Sprite
@@ -490,8 +489,8 @@ int Game::Run()
         swiWaitForVBlank();
         oamUpdate(&oamMain);
         oamUpdate(&oamSub);
-        return 0;
     }
+    return 0;
 }
 
 void Game::UpdateScore()
