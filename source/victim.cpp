@@ -2,11 +2,11 @@
 #include "Managers/spriteManager.h"
 #include <vector>
 
-victim::victim(int startX, int startY, SpriteManager& manager) : 
+Victim::Victim(int startX, int startY, SpriteManager& manager) : 
     x(startX), y(startY), animationFrames(3),
     currentState(CRYING), spriteManager(manager), currentSpriteId(10), victimAnim(0), victimFrame(0) {}
 
-void victim::updateState(State inputState)
+void Victim::updateState(State inputState)
 {
     if (currentState != inputState) {
         currentState = inputState;
@@ -14,7 +14,7 @@ void victim::updateState(State inputState)
     }
 }
 
-void victim::updateSprite() {
+void Victim::updateSprite() {
     spriteManager.hideSprite(1, currentSpriteId);
     switch (currentState) {
     case CRYING:
@@ -30,18 +30,18 @@ void victim::updateSprite() {
     }
 }
 
-std::vector<int> victim::getAnimationData() const
+std::vector<int> Victim::getAnimationData() const
 {
     return { victimAnim, victimFrame};
 }
 
-void victim::setAnimationData(int anim, int frame)
+void Victim::setAnimationData(int anim, int frame)
 {
     victimAnim = anim;
     victimFrame = frame;
 }
 
-int victim::getX() const { return x; }
-int victim::getY() const { return y; }
-int victim::getCurrentSpriteId() const { return currentSpriteId; }
-int victim::getAnimationFrames() const { return animationFrames; }
+int Victim::getX() const { return x; }
+int Victim::getY() const { return y; }
+int Victim::getCurrentSpriteId() const { return currentSpriteId; }
+int Victim::getAnimationFrames() const { return animationFrames; }

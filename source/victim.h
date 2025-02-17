@@ -5,7 +5,7 @@
 #include "Managers/spriteManager.h"
 #include <vector>
 
-class victim{
+class Victim{
 public:
     enum State {
         CRYING = 0,
@@ -23,7 +23,7 @@ private:
     int victimFrame;
 
 public:
-    victim(int startX, int startY, SpriteManager& manager);
+    Victim(int startX, int startY, SpriteManager& manager);
 
     int getX() const;
     int getY() const;
