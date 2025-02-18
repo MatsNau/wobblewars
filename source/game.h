@@ -55,7 +55,10 @@ private:
     void UpdateEnemies();
     void UpdateNina();
     void UpdateWeapon();
-
+    void PlayerIsPlaying();
+    void PlayerIsDead();
+    void PlayerIsWinning();
+    void PlayerInMenu();
 public:
     Game();
     int Initialize();

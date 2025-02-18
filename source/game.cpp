@@ -8,19 +8,319 @@
 #include "Managers/spriteManager.h"
 #include "game.h"
 
-Game::Game() : 
-    gameState(INTRO),
-    spriteManager(),
-    nina(128, 128, spriteManager),
-    victim(110, 128, spriteManager),
-    weaponSpriteId(0),
-    enemySpawnTimer(0),
-    gameover(false),
-    playerLeftScreenOne(false),
-    weapon_frame(0),
-    weapon_anim(0),
-    finishx(0),
-    finishy(0)
+void Game::PlayerIsPlaying()
+{
+    touchPosition touch;
+    touchRead(&touch);
+    // Handle Nina's movement
+    if (keysHeld() & KEY_UP)
+    {
+        nina.move(Nina::UP);
+        nina.setWalking(true);
+        //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
+    }
+    else if (keysHeld() & KEY_DOWN)
+    {
+        nina.move(Nina::DOWN);
+        nina.setWalking(true);
+        //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
+    }
+    else if (keysHeld() & KEY_LEFT)
+    {
+        nina.move(Nina::LEFT);
+        nina.setWalking(true);
+        //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
+    }
+    else if (keysHeld() & KEY_RIGHT)
+    {
+        nina.move(Nina::RIGHT);
+        nina.setWalking(true);
+        //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
+    }
+    //
+    //Walking sound
+    /*if(nina.isWalking() && !playWalkingSound)
+    {
+        //u8 sound_id = NF_PlayRawSound(1, 64, true, 0);
+        playWalkingSound = true;
+    }
+    else if(!nina.isWalking() && playWalkingSound)
+    {
+    }*/
+
+    //ANIMATION TEST
+    auto animationData = nina.getAnimationData();
+    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
+    nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+    //ANIMTAION TEST
+
+    // Handle weapon throwing
+    if (keysDown() & KEY_TOUCH)
+    {
+        nina.throwWeapon(touch.px, touch.py);            
+    }
+
+
+    // Update weapon position
+    nina.updateWeapon();
+    spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
+    spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
+
+
+    if (nina.isWeaponVisible() && nina.getWalking())
+    {
+        nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
+    }
+    else if (nina.isWeaponVisible() && !nina.getWalking())
+    {
+        nina.updateState(Nina::IDLE_WITHOUT_WEAPON);
+    }
+    else if (!nina.isWeaponVisible() && nina.getWalking())
+    {
+        nina.updateState(Nina::WALKING_WITH_WEAPON);
+    }
+    else
+    {
+        nina.updateState(Nina::IDLE_WITH_WEAPON);
+    }
+
+    if (nina.isWeaponVisible()) 
+    {
+        NF_ShowSprite(0, 5, true);
+        NF_MoveSprite(0, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+        //WEAPON ANIMATION TEST
+        weapon_anim++;
+        if (weapon_anim > 5)
+        {
+            weapon_anim = 0;
+            weapon_frame++;
+            if (weapon_frame > 3)
+                weapon_frame = 0;
+            NF_SpriteFrame(0, 5, weapon_frame);
+        }
+        //WEAPON ANIMATION TEST
+    }
+    else 
+    {
+        NF_ShowSprite(0, 5, false);
+    }
+    NF_MoveSprite(0, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+
+    // Enemy spawning
+    enemySpawnTimer++;
+    if (enemySpawnTimer >= ENEMY_SPAWN_INTERVAL) {
+        for (auto& enemy : enemies) {
+            if (!enemy.isActive()) {
+                int startX = std::rand() % 256; // Random x position
+                int startY = std::rand() % 192; // Random y position
+                enemy.spawn(startX, startY);
+                if(enemy.getInitializaionInfo())
+                {
+                    enemy.firstInitialization();
+                    NF_CreateSprite(0, 6 + (&enemy - &enemies[0]), 6, 6, enemy.getX(), enemy.getY());
+                    NF_CreateSprite(0, 16 + (&enemy - &enemies[0]), 7, 7, enemy.getX(), enemy.getY());
+                    NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
+                }
+                else
+                {
+                    NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), true);
+                }
+                break;
+            }
+        }
+        enemySpawnTimer = 0;
+    }
+
+    // Enemy movement and collision detection
+    for (auto& enemy : enemies) {
+        if (enemy.isActive() && enemy.getState() != Enemy::DYING) {
+            enemy.updateState(Enemy::CHASING, 6 + (&enemy - &enemies[0]));
+            enemy.moveTowards(nina.getX(), nina.getY());
+            spriteManager.moveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+            //ANIMATE HERE
+            spriteManager.flipSprite(0, 6 + (&enemy - &enemies[0]), enemy.calcDirection());
+            auto animationData = enemy.getAnimationData();
+            auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 6 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
+            enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
+            // Weapon collision
+            if (nina.getWeapon().isVisible()) {
+                int dx = enemy.getX() - nina.getWeapon().getX();
+                int dy = enemy.getY() - nina.getWeapon().getY();
+                if (dx * dx + dy * dy < 64 && enemy.getState() != Enemy::DYING) { // Assuming 8x8 sprite, so 8*8 = 64
+                    enemy.updateState(Enemy::DYING, 16 + (&enemy - &enemies[0]));
+                    NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
+                    //Increase Score
+                    nina.increaseScore();
+                    if(nina.getScore() >= MAX_SCORE)
+                    {
+                        gameState = WINNING;
+                        finishx = nina.getX();
+                        finishy = nina.getY();
+
+                    }
+                }
+            }
+
+            // Nina colission
+            int dx = enemy.getX() - nina.getX();
+            int dy = enemy.getY() - nina.getY();
+            if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
+                enemy.setActive(false);
+                NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
+                //Reduce Health
+                nina.reduceHealth();
+                if(nina.getHealth() <= 0)
+                {
+                    gameState = GAMEOVER;
+                }
+            }
+        }
+        else if(enemy.getState() == Enemy::DYING)
+        {
+            NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), true);
+            auto animationData = enemy.getAnimationData();
+            auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 16 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
+            enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
+            spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+            if(animationData[1] == 6)
+            {
+                enemy.updateState(Enemy::CHASING, 16 + (&enemy - &enemies[0]));
+                NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
+                enemy.setActive(false);
+            }
+
+        }
+    }
+}
+
+void Game::PlayerIsDead()
+{
+    if(nina.getWeapon().isVisible())
+    {
+        nina.updateState(Nina::DYING_WITHOUT_WEAPON);
+    }
+    else
+    {
+        nina.updateState(Nina::DYING);
+    }
+    if(!gameover)
+    {
+        auto animationData = nina.getAnimationData();
+        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
+        nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+        spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
+                    //spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
+        if(animationData[1] == 9 && !gameover)
+        {
+            gameover = true;
+            //Hide Dying Sprite
+            spriteManager.hideSprite(0, nina.getCurrentSpriteId());
+            // Game Over Nachricht anzeigen
+            NF_ClearTextLayer(0,1);
+            NF_WriteText16(0, 1, 8, 8, "GAME OVER!\n");
+            NF_WriteText16(0, 1, 8,  10, "Press A to restart");
+        }
+    }
+}
+
+void Game::PlayerIsWinning()
+{
+    if(nina.getX() >= 255 && !playerLeftScreenOne) 
+    {
+        playerLeftScreenOne = true;
+    }    
+    //UPDATE NINA SPRITE
+    if(!playerLeftScreenOne)
+    {
+        if(nina.getWeapon().isVisible())
+        {
+            nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
+        }
+        else
+        {
+            nina.updateState(Nina::WALKING_WITH_WEAPON);
+        }
+        nina.move(Nina::RIGHT);
+        // Update weapon position
+        nina.updateWeapon();
+        if (nina.isWeaponVisible()) 
+        {
+            NF_ShowSprite(0, 5, true);
+            NF_MoveSprite(0, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+            //WEAPON ANIMATION TEST
+            weapon_anim++;
+            if (weapon_anim > 5)
+            {
+                weapon_anim = 0;
+                weapon_frame++;
+                if (weapon_frame > 3)
+                    weapon_frame = 0;
+                NF_SpriteFrame(0, 5, weapon_frame);
+        }
+            //WEAPON ANIMATION TEST
+        }
+        else 
+        {
+            NF_ShowSprite(0, 5, false);
+        }
+        NF_MoveSprite(0, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+        spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
+        spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
+        //ANIMATION TEST
+        auto animationData = nina.getAnimationData();
+        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
+        nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+        //ANIMTAION TEST
+
+    } 
+    else
+    {        
+        if(nina.getX() >= 130)
+        {
+            nina.updateState(Nina::WALKING_WITH_WEAPON_SCREEN2);
+            nina.move(Nina::LEFT);
+        }else{
+            nina.updateState(Nina::WINNING);
+            victim.updateState(Victim::WINNING);
+        }
+        nina.updateWeapon();
+        spriteManager.flipSprite(1, nina.getCurrentSpriteId(), nina.calcDirection());
+        spriteManager.moveSprite(1, nina.getCurrentSpriteId(), nina.getX(), 128);
+        
+        NF_ClearTextLayer(0, 1);
+        NF_WriteText16(0, 1, 8, 8, "GEWONNEN! \n");
+        NF_WriteText16(0, 1, 8, 10, "Mats wurde gerettet!");
+
+        //ANIMATION TEST
+        auto animationData = nina.getAnimationData();
+        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 1, nina.getCurrentSpriteId(), nina.getAnimationFrames());
+        nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+        //ANIMTAION TEST
+    }   
+}
+
+void Game::PlayerInMenu()
+{
+    if(keysHeld() & KEY_A)
+    {
+        gameState = PLAYING;
+        // Start background music
+        u8 sound_id = NF_PlayRawSound(0, 127, 64, true, 0);
+    }
+}
+
+Game::Game() : gameState(INTRO),
+               spriteManager(),
+               nina(128, 128, spriteManager),
+               victim(110, 128, spriteManager),
+               weaponSpriteId(0),
+               enemySpawnTimer(0),
+               gameover(false),
+               playerLeftScreenOne(false),
+               weapon_frame(0),
+               weapon_anim(0),
+               finishx(0),
+               finishy(0)
 {
 }
 
@@ -147,12 +447,8 @@ int Game::Run()
 {
     while (1)
     {
-        //TODO: ADD START UP SCREEN WITH SOME INITIAL DIALOG
-        //TODO: Add A Heart Item that gives you health
-        //TODO: Sound Mangement: Start, Music on play, test for sounds for walking, and killing enemies, maybe dying.
+        // TODO: Add for each state one method
         scanKeys();
-        touchPosition touch;
-        touchRead(&touch);
         if(gameState == GAMEOVER || gameState == WINNING)
         {
             if (keysHeld() & KEY_A)
@@ -170,16 +466,8 @@ int Game::Run()
 
         if(gameState == INTRO)
         {
-            if(keysHeld() & KEY_A)
-            {
-                gameState = PLAYING;
-                // Start background music
-                u8 sound_id = NF_PlayRawSound(0, 127, 64, true, 0);
-            }
+            PlayerInMenu();
         }
-
-        // Update weapon's sprites
-        const Weapon& weapon = nina.getWeapon();
 
         //Update Victim Sprite
         spriteManager.moveSprite(1, victim.getCurrentSpriteId(), victim.getX(), victim.getY());
@@ -192,293 +480,18 @@ int Game::Run()
         // Update Nina's sprite
         if(gameState == PLAYING)
         {
-            // Handle Nina's movement
-            if (keysHeld() & KEY_UP)
-            {
-                nina.move(Nina::UP);
-                nina.setWalking(true);
-                //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
-            }
-            else if (keysHeld() & KEY_DOWN)
-            {
-                nina.move(Nina::DOWN);
-                nina.setWalking(true);
-                //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
-            }
-            else if (keysHeld() & KEY_LEFT)
-            {
-                nina.move(Nina::LEFT);
-                nina.setWalking(true);
-                //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
-            }
-            else if (keysHeld() & KEY_RIGHT)
-            {
-                nina.move(Nina::RIGHT);
-                nina.setWalking(true);
-                //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
-            }
-            //
-            //Walking sound
-            /*if(nina.isWalking() && !playWalkingSound)
-            {
-                //u8 sound_id = NF_PlayRawSound(1, 64, true, 0);
-                playWalkingSound = true;
-            }
-            else if(!nina.isWalking() && playWalkingSound)
-            {
-            }*/
-
-            //ANIMATION TEST
-            auto animationData = nina.getAnimationData();
-            auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
-            nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
-            //ANIMTAION TEST
-
-            // Handle weapon throwing
-            if (keysDown() & KEY_TOUCH)
-            {
-                nina.throwWeapon(touch.px, touch.py);            
-            }
-
-
-            // Update weapon position
-            nina.updateWeapon();
-            spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
-            spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
-        
-        
-            if (nina.isWeaponVisible() && nina.getWalking())
-            {
-                nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
-            }
-            else if (nina.isWeaponVisible() && !nina.getWalking())
-            {
-                nina.updateState(Nina::IDLE_WITHOUT_WEAPON);
-            }
-            else if (!nina.isWeaponVisible() && nina.getWalking())
-            {
-                nina.updateState(Nina::WALKING_WITH_WEAPON);
-            }
-            else
-            {
-                nina.updateState(Nina::IDLE_WITH_WEAPON);
-            }
-        
-            if (nina.isWeaponVisible()) 
-            {
-                NF_ShowSprite(0, 5, true);
-                NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
-                //WEAPON ANIMATION TEST
-                weapon_anim++;
-                if (weapon_anim > 5)
-                {
-                    weapon_anim = 0;
-                    weapon_frame++;
-                    if (weapon_frame > 3)
-                        weapon_frame = 0;
-                    NF_SpriteFrame(0, 5, weapon_frame);
-                }
-                //WEAPON ANIMATION TEST
-            }
-            else 
-            {
-                NF_ShowSprite(0, 5, false);
-            }
-            NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
-
-            // Enemy spawning
-            enemySpawnTimer++;
-            if (enemySpawnTimer >= ENEMY_SPAWN_INTERVAL) {
-                for (auto& enemy : enemies) {
-                    if (!enemy.isActive()) {
-                        int startX = std::rand() % 256; // Random x position
-                        int startY = std::rand() % 192; // Random y position
-                        enemy.spawn(startX, startY);
-                        if(enemy.getInitializaionInfo())
-                        {
-                            enemy.firstInitialization();
-                            NF_CreateSprite(0, 6 + (&enemy - &enemies[0]), 6, 6, enemy.getX(), enemy.getY());
-                            NF_CreateSprite(0, 16 + (&enemy - &enemies[0]), 7, 7, enemy.getX(), enemy.getY());
-                            NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
-                        }
-                        else
-                        {
-                            NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), true);
-                        }
-                        break;
-                    }
-                }
-                enemySpawnTimer = 0;
-            }
-
-            // Enemy movement and collision detection
-            for (auto& enemy : enemies) {
-                if (enemy.isActive() && enemy.getState() != Enemy::DYING) {
-                    enemy.updateState(Enemy::CHASING, 6 + (&enemy - &enemies[0]));
-                    enemy.moveTowards(nina.getX(), nina.getY());
-                    spriteManager.moveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
-                    //ANIMATE HERE
-                    spriteManager.flipSprite(0, 6 + (&enemy - &enemies[0]), enemy.calcDirection());
-                    auto animationData = enemy.getAnimationData();
-                    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 6 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
-                    enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
-                    // Weapon collision
-                    const Weapon& weapon = nina.getWeapon();
-                    if (weapon.isVisible()) {
-                        int dx = enemy.getX() - weapon.getX();
-                        int dy = enemy.getY() - weapon.getY();
-                        if (dx * dx + dy * dy < 64 && enemy.getState() != Enemy::DYING) { // Assuming 8x8 sprite, so 8*8 = 64
-                            enemy.updateState(Enemy::DYING, 16 + (&enemy - &enemies[0]));
-                            NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
-                            //Increase Score
-                            nina.increaseScore();
-                            if(nina.getScore() >= MAX_SCORE)
-                            {
-                                gameState = WINNING;
-                                finishx = nina.getX();
-                                finishy = nina.getY();
-
-                            }
-                        }
-                    }
-
-                    // Nina colission
-                    int dx = enemy.getX() - nina.getX();
-                    int dy = enemy.getY() - nina.getY();
-                    if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
-                        enemy.setActive(false);
-                        NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
-                        //Reduce Health
-                        nina.reduceHealth();
-                        if(nina.getHealth() <= 0)
-                        {
-                            gameState = GAMEOVER;
-                        }
-                    }
-                }
-                else if(enemy.getState() == Enemy::DYING)
-                {
-                    NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), true);
-                    auto animationData = enemy.getAnimationData();
-                    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 16 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
-                    enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
-                    spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
-                    if(animationData[1] == 6)
-                    {
-                        enemy.updateState(Enemy::CHASING, 16 + (&enemy - &enemies[0]));
-                        NF_ShowSprite(0, 16 + (&enemy - &enemies[0]), false);
-                        enemy.setActive(false);
-                    }
-
-                }
-            }
+            PlayerIsPlaying();
         }
 
         if (gameState == GAMEOVER)
         {
             //TODO: CHECK WHY PLAYER DISAPPEARS FOR ONE FRAME
-            
-            if(weapon.isVisible())
-            {
-                nina.updateState(Nina::DYING_WITHOUT_WEAPON);
-            }
-            else
-            {
-                nina.updateState(Nina::DYING);
-            }
-            if(!gameover)
-            {
-                auto animationData = nina.getAnimationData();
-                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
-                nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
-                spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
-                            //spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
-                if(animationData[1] == 9 && !gameover)
-                {
-                    gameover = true;
-                    //Hide Dying Sprite
-                    spriteManager.hideSprite(0, nina.getCurrentSpriteId());
-                    // Game Over Nachricht anzeigen
-                    NF_ClearTextLayer(0,1);
-                    NF_WriteText16(0, 1, 8, 8, "GAME OVER!\n");
-                    NF_WriteText16(0, 1, 8,  10, "Press A to restart");
-                }
-            }
+            PlayerIsDead();
         }
 
         if(gameState == WINNING)
         {
-            if(nina.getX() >= 255 && !playerLeftScreenOne) 
-            {
-                playerLeftScreenOne = true;
-            }    
-            //UPDATE NINA SPRITE
-            if(!playerLeftScreenOne)
-            {
-                if(weapon.isVisible())
-                {
-                    nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
-                }
-                else
-                {
-                    nina.updateState(Nina::WALKING_WITH_WEAPON);
-                }
-                nina.move(Nina::RIGHT);
-                // Update weapon position
-                nina.updateWeapon();
-                if (nina.isWeaponVisible()) 
-                {
-                    NF_ShowSprite(0, 5, true);
-                    NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
-                    //WEAPON ANIMATION TEST
-                    weapon_anim++;
-                    if (weapon_anim > 5)
-                    {
-                        weapon_anim = 0;
-                        weapon_frame++;
-                        if (weapon_frame > 3)
-                            weapon_frame = 0;
-                        NF_SpriteFrame(0, 5, weapon_frame);
-                }
-                    //WEAPON ANIMATION TEST
-                }
-                else 
-                {
-                    NF_ShowSprite(0, 5, false);
-                }
-                NF_MoveSprite(0, 5, weapon.getX(), weapon.getY());
-                spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
-                spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
-                //ANIMATION TEST
-                auto animationData = nina.getAnimationData();
-                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
-                nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
-                //ANIMTAION TEST
-
-            } else
-            {        
-                if(nina.getX() >= 130)
-                {
-                    nina.updateState(Nina::WALKING_WITH_WEAPON_SCREEN2);
-                    nina.move(Nina::LEFT);
-                }else{
-                    nina.updateState(Nina::WINNING);
-                    victim.updateState(Victim::WINNING);
-                }
-                nina.updateWeapon();
-                spriteManager.flipSprite(1, nina.getCurrentSpriteId(), nina.calcDirection());
-                spriteManager.moveSprite(1, nina.getCurrentSpriteId(), nina.getX(), 128);
-                
-                NF_ClearTextLayer(0, 1);
-                NF_WriteText16(0, 1, 8, 8, "GEWONNEN! \n");
-                NF_WriteText16(0, 1, 8, 10, "Mats wurde gerettet!");
-
-                //ANIMATION TEST
-                auto animationData = nina.getAnimationData();
-                auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 1, nina.getCurrentSpriteId(), nina.getAnimationFrames());
-                nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
-                //ANIMTAION TEST
-            }
+            PlayerIsWinning();
         }
 
         nina.setWalking(false);
