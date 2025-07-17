@@ -111,8 +111,29 @@ void Game::PlayerIsPlaying()
     if (enemySpawnTimer >= ENEMY_SPAWN_INTERVAL) {
         for (auto& enemy : enemies) {
             if (!enemy.isActive()) {
-                int startX = std::rand() % 256; // Random x position
-                int startY = std::rand() % 192; // Random y position
+                // Randomly spawn enemies at the edges of the screen                
+                int startX, startY;
+                int side = std::rand() % 4;
+                
+                switch(side) {
+                    case 0: // Oben
+                        startX = std::rand() % 256;
+                        startY = -32;
+                        break;
+                    case 1: // Rechts
+                        startX = 256 + 32;
+                        startY = std::rand() % 192; 
+                        break;
+                    case 2: // Unten
+                        startX = std::rand() % 256;
+                        startY = 192 + 32;
+                        break;
+                    case 3: // Links
+                        startX = -32;
+                        startY = std::rand() % 192; 
+                        break;
+                }
+
                 enemy.spawn(startX, startY);
                 if(enemy.getInitializaionInfo())
                 {
@@ -124,6 +145,7 @@ void Game::PlayerIsPlaying()
                 else
                 {
                     NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), true);
+                    spriteManager.moveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
                 }
                 break;
             }
