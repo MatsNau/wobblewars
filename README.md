@@ -1,6 +1,3 @@
-
-WobbleWars DS is simple game for the Nintendo DS made with [NightFox's Lib](https://gbatemp.net/threads/nightfoxs-lib-for-libnds-nflib-ds-entry-coding-library.280385/) and libnds. Based on polymars [Snake DS](https://github.com/PolyMarsDev/Snake-DS) 
-
 # WobbleWars-DS
 
 A Nintendo DS homebrew game developed using DevKitPro and NightFoxLib. Based on the snake game by polymars [Snake DS](https://github.com/PolyMarsDev/Snake-DS). This is a 2D action game where the player controls a Hero, who must defend herself against enemies while progressing through the game to finally save her friend.
