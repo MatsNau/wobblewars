@@ -1,7 +1,7 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
-#include "Managers/spriteManager.h"
+#include "../Managers/spriteManager.h"
 #include <vector>
 
 class Enemy {

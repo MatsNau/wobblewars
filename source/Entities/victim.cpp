@@ -1,5 +1,5 @@
 #include "victim.h"
-#include "Managers/spriteManager.h"
+#include "../Managers/spriteManager.h"
 #include <vector>
 
 Victim::Victim(int startX, int startY, SpriteManager& manager) : 

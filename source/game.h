@@ -5,9 +5,9 @@
 #include <nf_lib.h>
 #include <ctime>
 #include <vector>
-#include "nina.h"
-#include "enemy.h"
-#include "victim.h"
+#include "Entities/player.h"
+#include "Entities/enemy.h"
+#include "Entities/victim.h"
 #include "Managers/spriteManager.h"
 
 class Game {
@@ -21,7 +21,7 @@ private:
 
     GameState gameState;
     SpriteManager spriteManager;
-    Nina nina;
+    Player player;
     Victim victim;
     std::vector<Enemy> enemies;
     

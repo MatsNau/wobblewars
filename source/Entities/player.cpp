@@ -1,13 +1,13 @@
-#include "nina.h"
-#include "Managers/spriteManager.h"
+#include "player.h"
+#include "../Managers/spriteManager.h"
 #include <vector>
 
-Nina::Nina(int startX, int startY, SpriteManager& manager) : 
+Player::Player(int startX, int startY, SpriteManager& manager) : 
     x(startX), y(startY),health(5), speed(2), score(0), weapon(x, y), isWalking(false), animationFrames(3),
     currentState(IDLE_WITH_WEAPON), spriteManager(manager), currentSpriteId(0), playerAnim(0), playerFrame(0), toFlip(false), 
     prevX(startX) {}
 
-void Nina::move(int direction) 
+void Player::move(int direction) 
 {
     prevX = x;
     switch (direction) 
@@ -31,12 +31,12 @@ void Nina::move(int direction)
     }
 }
 
-void Nina::throwWeapon(int targetX, int targetY) 
+void Player::throwWeapon(int targetX, int targetY) 
 {
     weapon.throw_(x, y, targetX, targetY);
 }
 
-void Nina::updateWeapon() 
+void Player::updateWeapon() 
 {
     if (weapon.isReturning()) 
     {
@@ -48,17 +48,17 @@ void Nina::updateWeapon()
     }
 }
 
-void Nina::increaseScore()
+void Player::increaseScore()
 {
     score++;
 }
 
-void Nina::reduceHealth()
+void Player::reduceHealth()
 {
     health--;
 }
 
-void Nina::updateState(State inputState)
+void Player::updateState(State inputState)
 {
     if (currentState != inputState) {
         currentState = inputState;
@@ -66,7 +66,7 @@ void Nina::updateState(State inputState)
     }
 }
 
-void Nina::updateSprite() {
+void Player::updateSprite() {
     spriteManager.hideSprite(0, currentSpriteId);
     spriteManager.hideSprite(1, currentSpriteId);
     switch (currentState) {
@@ -113,7 +113,7 @@ void Nina::updateSprite() {
     }
 }
 
-bool Nina::calcDirection()
+bool Player::calcDirection()
 {
     bool shouldFlip = false;
     if (x < prevX)
@@ -127,23 +127,23 @@ bool Nina::calcDirection()
     return shouldFlip;
 }
 
-void Nina::setWalking(bool walkingUpdate)
+void Player::setWalking(bool walkingUpdate)
 {
     isWalking = walkingUpdate;
 }
 
-std::vector<int> Nina::getAnimationData() const
+std::vector<int> Player::getAnimationData() const
 {
     return { playerAnim, playerFrame};
 }
 
-void Nina::setAnimationData(int anim, int frame)
+void Player::setAnimationData(int anim, int frame)
 {
     playerAnim = anim;
     playerFrame = frame;
 }
 
-void Nina::reset(int startX, int startY) {
+void Player::reset(int startX, int startY) {
     x = startX;
     y = startY;
     State inputState = IDLE_WITH_WEAPON;
@@ -155,12 +155,12 @@ void Nina::reset(int startX, int startY) {
     updateState(currentState);
 }
 
-int Nina::getScore() const { return score; }
-int Nina::getHealth() const { return health; }
-int Nina::getX() const { return x; }
-int Nina::getY() const { return y; }
-const Weapon& Nina::getWeapon() const { return weapon; }
-bool Nina::isWeaponVisible() const { return weapon.isVisible(); }
-int Nina::getCurrentSpriteId() const { return currentSpriteId; }
-bool Nina::getWalking() const { return isWalking; }
-int Nina::getAnimationFrames() const { return animationFrames; }
+int Player::getScore() const { return score; }
+int Player::getHealth() const { return health; }
+int Player::getX() const { return x; }
+int Player::getY() const { return y; }
+const Weapon& Player::getWeapon() const { return weapon; }
+bool Player::isWeaponVisible() const { return weapon.isVisible(); }
+int Player::getCurrentSpriteId() const { return currentSpriteId; }
+bool Player::getWalking() const { return isWalking; }
+int Player::getAnimationFrames() const { return animationFrames; }

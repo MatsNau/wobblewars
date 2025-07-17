@@ -1,11 +1,11 @@
-#ifndef NINA_H
-#define NINA_H
+#ifndef PLAYER_H
+#define PLAYER_H
 
 #include "weapon.h"
-#include "Managers/spriteManager.h"
+#include "../Managers/spriteManager.h"
 #include <vector>
 
-class Nina {
+class Player {
 
 public:
     enum State {
@@ -39,7 +39,7 @@ private:
 
 
 public:
-    Nina(int startX, int startY, SpriteManager& manager);
+    Player(int startX, int startY, SpriteManager& manager);
 
     void move(int direction);
     void throwWeapon(int targetX, int targetY);
@@ -79,4 +79,4 @@ public:
     static const int RIGHT = 3;
 };
 
-#endif // NINA_H
+#endif // Player_H

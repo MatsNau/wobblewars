@@ -2,7 +2,7 @@
 #define VICTIM_H
 
 #include "weapon.h"
-#include "Managers/spriteManager.h"
+#include "../Managers/spriteManager.h"
 #include <vector>
 
 class Victim{

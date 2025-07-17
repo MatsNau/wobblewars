@@ -2,9 +2,9 @@
 #include <nf_lib.h>
 #include <ctime>
 #include <vector>
-#include "nina.h"
-#include "enemy.h"
-#include "victim.h"
+#include "Entities/player.h"
+#include "Entities/enemy.h"
+#include "Entities/victim.h"
 #include "Managers/spriteManager.h"
 #include "game.h"
 
@@ -12,82 +12,82 @@ void Game::PlayerIsPlaying()
 {
     touchPosition touch;
     touchRead(&touch);
-    // Handle Nina's movement
+    // Handle player's movement
     if (keysHeld() & KEY_UP)
     {
-        nina.move(Nina::UP);
-        nina.setWalking(true);
+        player.move(Player::UP);
+        player.setWalking(true);
         //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
     }
     else if (keysHeld() & KEY_DOWN)
     {
-        nina.move(Nina::DOWN);
-        nina.setWalking(true);
+        player.move(Player::DOWN);
+        player.setWalking(true);
         //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
     }
     else if (keysHeld() & KEY_LEFT)
     {
-        nina.move(Nina::LEFT);
-        nina.setWalking(true);
+        player.move(Player::LEFT);
+        player.setWalking(true);
         //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
     }
     else if (keysHeld() & KEY_RIGHT)
     {
-        nina.move(Nina::RIGHT);
-        nina.setWalking(true);
+        player.move(Player::RIGHT);
+        player.setWalking(true);
         //u8 sound_id = NF_PlayRawSound(1, 127, 64,  false, 0);
     }
     //
     //Walking sound
-    /*if(nina.isWalking() && !playWalkingSound)
+    /*if(player.isWalking() && !playWalkingSound)
     {
         //u8 sound_id = NF_PlayRawSound(1, 64, true, 0);
         playWalkingSound = true;
     }
-    else if(!nina.isWalking() && playWalkingSound)
+    else if(!player.isWalking() && playWalkingSound)
     {
     }*/
 
     //ANIMATION TEST
-    auto animationData = nina.getAnimationData();
-    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
-    nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+    auto animationData = player.getAnimationData();
+    auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, player.getCurrentSpriteId(), player.getAnimationFrames());
+    player.setAnimationData(newAnimationData[0], newAnimationData[1]);
     //ANIMTAION TEST
 
     // Handle weapon throwing
     if (keysDown() & KEY_TOUCH)
     {
-        nina.throwWeapon(touch.px, touch.py);            
+        player.throwWeapon(touch.px, touch.py);            
     }
 
 
     // Update weapon position
-    nina.updateWeapon();
-    spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
-    spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
+    player.updateWeapon();
+    spriteManager.flipSprite(0, player.getCurrentSpriteId(), player.calcDirection());
+    spriteManager.moveSprite(0, player.getCurrentSpriteId(), player.getX(), player.getY());
 
 
-    if (nina.isWeaponVisible() && nina.getWalking())
+    if (player.isWeaponVisible() && player.getWalking())
     {
-        nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
+        player.updateState(Player::WALKING_WITHOUT_WEAPON);
     }
-    else if (nina.isWeaponVisible() && !nina.getWalking())
+    else if (player.isWeaponVisible() && !player.getWalking())
     {
-        nina.updateState(Nina::IDLE_WITHOUT_WEAPON);
+        player.updateState(Player::IDLE_WITHOUT_WEAPON);
     }
-    else if (!nina.isWeaponVisible() && nina.getWalking())
+    else if (!player.isWeaponVisible() && player.getWalking())
     {
-        nina.updateState(Nina::WALKING_WITH_WEAPON);
+        player.updateState(Player::WALKING_WITH_WEAPON);
     }
     else
     {
-        nina.updateState(Nina::IDLE_WITH_WEAPON);
+        player.updateState(Player::IDLE_WITH_WEAPON);
     }
 
-    if (nina.isWeaponVisible()) 
+    if (player.isWeaponVisible()) 
     {
         NF_ShowSprite(0, 5, true);
-        NF_MoveSprite(0, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+        NF_MoveSprite(0, 5, player.getWeapon().getX(), player.getWeapon().getY());
         //WEAPON ANIMATION TEST
         weapon_anim++;
         if (weapon_anim > 5)
@@ -104,7 +104,7 @@ void Game::PlayerIsPlaying()
     {
         NF_ShowSprite(0, 5, false);
     }
-    NF_MoveSprite(0, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+    NF_MoveSprite(0, 5, player.getWeapon().getX(), player.getWeapon().getY());
 
     // Enemy spawning
     enemySpawnTimer++;
@@ -135,7 +135,7 @@ void Game::PlayerIsPlaying()
     for (auto& enemy : enemies) {
         if (enemy.isActive() && enemy.getState() != Enemy::DYING) {
             enemy.updateState(Enemy::CHASING, 6 + (&enemy - &enemies[0]));
-            enemy.moveTowards(nina.getX(), nina.getY());
+            enemy.moveTowards(player.getX(), player.getY());
             spriteManager.moveSprite(0, 6 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
             //ANIMATE HERE
             spriteManager.flipSprite(0, 6 + (&enemy - &enemies[0]), enemy.calcDirection());
@@ -143,33 +143,33 @@ void Game::PlayerIsPlaying()
             auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, 6 + (&enemy - &enemies[0]), enemy.getAnimationFrames());
             enemy.setAnimationData(newAnimationData[0], newAnimationData[1]);
             // Weapon collision
-            if (nina.getWeapon().isVisible()) {
-                int dx = enemy.getX() - nina.getWeapon().getX();
-                int dy = enemy.getY() - nina.getWeapon().getY();
+            if (player.getWeapon().isVisible()) {
+                int dx = enemy.getX() - player.getWeapon().getX();
+                int dy = enemy.getY() - player.getWeapon().getY();
                 if (dx * dx + dy * dy < 64 && enemy.getState() != Enemy::DYING) { // Assuming 8x8 sprite, so 8*8 = 64
                     enemy.updateState(Enemy::DYING, 16 + (&enemy - &enemies[0]));
                     NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
                     //Increase Score
-                    nina.increaseScore();
-                    if(nina.getScore() >= MAX_SCORE)
+                    player.increaseScore();
+                    if(player.getScore() >= MAX_SCORE)
                     {
                         gameState = WINNING;
-                        finishx = nina.getX();
-                        finishy = nina.getY();
+                        finishx = player.getX();
+                        finishy = player.getY();
 
                     }
                 }
             }
 
-            // Nina colission
-            int dx = enemy.getX() - nina.getX();
-            int dy = enemy.getY() - nina.getY();
+            // player colission
+            int dx = enemy.getX() - player.getX();
+            int dy = enemy.getY() - player.getY();
             if (dx * dx + dy * dy < 64) { // Assuming 8x8 sprite, so 8*8 = 64
                 enemy.setActive(false);
                 NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
                 //Reduce Health
-                nina.reduceHealth();
-                if(nina.getHealth() <= 0)
+                player.reduceHealth();
+                if(player.getHealth() <= 0)
                 {
                     gameState = GAMEOVER;
                 }
@@ -195,26 +195,26 @@ void Game::PlayerIsPlaying()
 
 void Game::PlayerIsDead()
 {
-    if(nina.getWeapon().isVisible())
+    if(player.getWeapon().isVisible())
     {
-        nina.updateState(Nina::DYING_WITHOUT_WEAPON);
+        player.updateState(Player::DYING_WITHOUT_WEAPON);
     }
     else
     {
-        nina.updateState(Nina::DYING);
+        player.updateState(Player::DYING);
     }
     if(!gameover)
     {
-        auto animationData = nina.getAnimationData();
-        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
-        nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
-        spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
+        auto animationData = player.getAnimationData();
+        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, player.getCurrentSpriteId(), player.getAnimationFrames());
+        player.setAnimationData(newAnimationData[0], newAnimationData[1]);
+        spriteManager.flipSprite(0, player.getCurrentSpriteId(), player.calcDirection());
                     //spriteManager.moveSprite(0, 16 + (&enemy - &enemies[0]), enemy.getX(), enemy.getY());
         if(animationData[1] == 9 && !gameover)
         {
             gameover = true;
             //Hide Dying Sprite
-            spriteManager.hideSprite(0, nina.getCurrentSpriteId());
+            spriteManager.hideSprite(0, player.getCurrentSpriteId());
             // Game Over Nachricht anzeigen
             NF_ClearTextLayer(0,1);
             NF_WriteText16(0, 1, 8, 8, "GAME OVER!\n");
@@ -225,28 +225,28 @@ void Game::PlayerIsDead()
 
 void Game::PlayerIsWinning()
 {
-    if(nina.getX() >= 255 && !playerLeftScreenOne) 
+    if(player.getX() >= 255 && !playerLeftScreenOne) 
     {
         playerLeftScreenOne = true;
     }    
-    //UPDATE NINA SPRITE
+    //UPDATE player SPRITE
     if(!playerLeftScreenOne)
     {
-        if(nina.getWeapon().isVisible())
+        if(player.getWeapon().isVisible())
         {
-            nina.updateState(Nina::WALKING_WITHOUT_WEAPON);
+            player.updateState(Player::WALKING_WITHOUT_WEAPON);
         }
         else
         {
-            nina.updateState(Nina::WALKING_WITH_WEAPON);
+            player.updateState(Player::WALKING_WITH_WEAPON);
         }
-        nina.move(Nina::RIGHT);
+        player.move(Player::RIGHT);
         // Update weapon position
-        nina.updateWeapon();
-        if (nina.isWeaponVisible()) 
+        player.updateWeapon();
+        if (player.isWeaponVisible()) 
         {
             NF_ShowSprite(0, 5, true);
-            NF_MoveSprite(0, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+            NF_MoveSprite(0, 5, player.getWeapon().getX(), player.getWeapon().getY());
             //WEAPON ANIMATION TEST
             weapon_anim++;
             if (weapon_anim > 5)
@@ -263,38 +263,38 @@ void Game::PlayerIsWinning()
         {
             NF_ShowSprite(0, 5, false);
         }
-        NF_MoveSprite(0, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
-        spriteManager.flipSprite(0, nina.getCurrentSpriteId(), nina.calcDirection());
-        spriteManager.moveSprite(0, nina.getCurrentSpriteId(), nina.getX(), nina.getY());
+        NF_MoveSprite(0, 5, player.getWeapon().getX(), player.getWeapon().getY());
+        spriteManager.flipSprite(0, player.getCurrentSpriteId(), player.calcDirection());
+        spriteManager.moveSprite(0, player.getCurrentSpriteId(), player.getX(), player.getY());
         //ANIMATION TEST
-        auto animationData = nina.getAnimationData();
-        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, nina.getCurrentSpriteId(), nina.getAnimationFrames());
-        nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+        auto animationData = player.getAnimationData();
+        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 0, player.getCurrentSpriteId(), player.getAnimationFrames());
+        player.setAnimationData(newAnimationData[0], newAnimationData[1]);
         //ANIMTAION TEST
 
     } 
     else
     {        
-        if(nina.getX() >= 130)
+        if(player.getX() >= 130)
         {
-            nina.updateState(Nina::WALKING_WITH_WEAPON_SCREEN2);
-            nina.move(Nina::LEFT);
+            player.updateState(Player::WALKING_WITH_WEAPON_SCREEN2);
+            player.move(Player::LEFT);
         }else{
-            nina.updateState(Nina::WINNING);
+            player.updateState(Player::WINNING);
             victim.updateState(Victim::WINNING);
         }
-        nina.updateWeapon();
-        spriteManager.flipSprite(1, nina.getCurrentSpriteId(), nina.calcDirection());
-        spriteManager.moveSprite(1, nina.getCurrentSpriteId(), nina.getX(), 128);
+        player.updateWeapon();
+        spriteManager.flipSprite(1, player.getCurrentSpriteId(), player.calcDirection());
+        spriteManager.moveSprite(1, player.getCurrentSpriteId(), player.getX(), 128);
         
         NF_ClearTextLayer(0, 1);
         NF_WriteText16(0, 1, 8, 8, "GEWONNEN! \n");
         NF_WriteText16(0, 1, 8, 10, "Mats wurde gerettet!");
 
         //ANIMATION TEST
-        auto animationData = nina.getAnimationData();
-        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 1, nina.getCurrentSpriteId(), nina.getAnimationFrames());
-        nina.setAnimationData(newAnimationData[0], newAnimationData[1]);
+        auto animationData = player.getAnimationData();
+        auto newAnimationData = spriteManager.animateSprite(animationData[0], animationData[1], 1, player.getCurrentSpriteId(), player.getAnimationFrames());
+        player.setAnimationData(newAnimationData[0], newAnimationData[1]);
         //ANIMTAION TEST
     }   
 }
@@ -311,7 +311,7 @@ void Game::PlayerInMenu()
 
 Game::Game() : gameState(INTRO),
                spriteManager(),
-               nina(128, 128, spriteManager),
+               player(128, 128, spriteManager),
                victim(110, 128, spriteManager),
                weaponSpriteId(0),
                enemySpawnTimer(0),
@@ -357,42 +357,42 @@ int Game::Initialize()
     NF_InitSpriteSys(1);
     //Load Character Sprites
     //Idle with Weapon
-    spriteManager.initSprite("sprites/nina/idle", 0, 32, 0, 0, 0, false, 0);
-    spriteManager.createSprite(0, 0, 0, 0, nina.getX(), nina.getY());
+    spriteManager.initSprite("sprites/player/idle", 0, 32, 0, 0, 0, false, 0);
+    spriteManager.createSprite(0, 0, 0, 0, player.getX(), player.getY());
     //Idle Without Weapon
-    spriteManager.initSprite("sprites/nina/idleWithoutWeapon", 1, 32, 0, 1, 1, false, 1);
-    spriteManager.createSprite(0, 1, 1, 1, nina.getX(), nina.getY());
+    spriteManager.initSprite("sprites/player/idleWithoutWeapon", 1, 32, 0, 1, 1, false, 1);
+    spriteManager.createSprite(0, 1, 1, 1, player.getX(), player.getY());
     spriteManager.hideSprite(0, 1);
     //Walking with Weapon
-    spriteManager.initSprite("sprites/nina/walking", 2, 32, 0, 2, 2, false, 2);
-    spriteManager.createSprite(0, 2, 2, 2, nina.getX(), nina.getY());
+    spriteManager.initSprite("sprites/player/walking", 2, 32, 0, 2, 2, false, 2);
+    spriteManager.createSprite(0, 2, 2, 2, player.getX(), player.getY());
     spriteManager.hideSprite(0, 2);
     //Walking without Weapon
-    spriteManager.initSprite("sprites/nina/walkingWithoutWeapon", 3, 32, 0, 3, 3, false, 3);
-    spriteManager.createSprite(0, 3, 3, 3, nina.getX(), nina.getY());
+    spriteManager.initSprite("sprites/player/walkingWithoutWeapon", 3, 32, 0, 3, 3, false, 3);
+    spriteManager.createSprite(0, 3, 3, 3, player.getX(), player.getY());
     spriteManager.hideSprite(0, 3);
     //Weapon Throw
     //Dying
-    spriteManager.initSprite("sprites/nina/Death", 4, 32, 0, 4, 4, false, 4);
-    spriteManager.createSprite(0, 4, 4, 4, nina.getX(), nina.getY());
+    spriteManager.initSprite("sprites/player/Death", 4, 32, 0, 4, 4, false, 4);
+    spriteManager.createSprite(0, 4, 4, 4, player.getX(), player.getY());
     spriteManager.hideSprite(0, 4);
     //Dying without weapon
-    spriteManager.initSprite("sprites/nina/DeathWithoutWeapon", 8, 32, 0, 8, 8, false, 8);
-    spriteManager.createSprite(0, 8, 8, 8, nina.getX(), nina.getY());
+    spriteManager.initSprite("sprites/player/DeathWithoutWeapon", 8, 32, 0, 8, 8, false, 8);
+    spriteManager.createSprite(0, 8, 8, 8, player.getX(), player.getY());
     spriteManager.hideSprite(0, 8);
     //Walking with Weapon on Screen2
-    spriteManager.initSprite("sprites/nina/walking", 9, 32, 1, 9, 9, false, 9);
-    spriteManager.createSprite(1, 9, 9, 9, nina.getX(), nina.getY());
+    spriteManager.initSprite("sprites/player/walking", 9, 32, 1, 9, 9, false, 9);
+    spriteManager.createSprite(1, 9, 9, 9, player.getX(), player.getY());
     spriteManager.hideSprite(1, 9);
     //Win Screen Two
-    spriteManager.initSprite("sprites/nina/Win", 11, 32, 1, 11, 11, false, 11);
-    spriteManager.createSprite(1, 11, 11, 11, nina.getX(), nina.getY());
+    spriteManager.initSprite("sprites/player/Win", 11, 32, 1, 11, 11, false, 11);
+    spriteManager.createSprite(1, 11, 11, 11, player.getX(), player.getY());
     spriteManager.hideSprite(1, 11);
 
     //Load Weapon Sprites
     //Flying 
     spriteManager.initSprite("sprites/weapon/throw", 5, 32, 0, 5, 5, false, 5);
-    spriteManager.createSprite(0, 5, 5, 5, nina.getWeapon().getX(), nina.getWeapon().getY());
+    spriteManager.createSprite(0, 5, 5, 5, player.getWeapon().getX(), player.getWeapon().getY());
     spriteManager.hideSprite(0, 5);
     //Load Enemies
     //Walking
@@ -477,7 +477,7 @@ int Game::Run()
         victim.setAnimationData(newAnimationData[0], newAnimationData[1]);
         //ANIMTAION TES
 
-        // Update Nina's sprite
+        // Update player's sprite
         if(gameState == PLAYING)
         {
             PlayerIsPlaying();
@@ -494,7 +494,7 @@ int Game::Run()
             PlayerIsWinning();
         }
 
-        nina.setWalking(false);
+        player.setWalking(false);
         UpdateScoreAndHealth();
 
         NF_SpriteOamSet(0);
@@ -508,7 +508,7 @@ int Game::Run()
 
 void Game::UpdateScore()
 {
-    sprintf(score, "SCORE: %d", nina.getScore());
+    sprintf(score, "SCORE: %d", player.getScore());
     NF_ClearTextLayer(0, 0);
     NF_WriteText16(0, 0, 2, 2, score);
     NF_UpdateTextLayers();
@@ -516,7 +516,7 @@ void Game::UpdateScore()
 
 void Game::UpdateHealth()
 {
-    sprintf(health, "<3: %d", nina.getHealth());
+    sprintf(health, "<3: %d", player.getHealth());
     NF_ClearTextLayer(0, 1);
     NF_WriteText16(0, 1, 15, 2, health);
     NF_UpdateTextLayers();
@@ -527,8 +527,8 @@ void Game::UpdateScoreAndHealth()
     NF_ClearTextLayer(0, 0);  // Clear nur einmal für beide Texte
     
     // Score und Health in Strings formatieren
-    sprintf(score, "SCORE: %d", nina.getScore());
-    sprintf(health, "<3: %d", nina.getHealth());
+    sprintf(score, "SCORE: %d", player.getScore());
+    sprintf(health, "<3: %d", player.getHealth());
     
     // Beide Texte auf demselben Layer schreiben
     NF_WriteText16(0, 0, 2, 2, score);    // Links oben
@@ -548,7 +548,7 @@ void Game::ResetGame()
             NF_ShowSprite(0, 6 + (&enemy - &enemies[0]), false);
         }
     }
-    nina.reset(128, 96);
+    player.reset(128, 96);
     enemySpawnTimer = 0;
     NF_ClearTextLayer16(0, 1);
     NF_UpdateTextLayers();

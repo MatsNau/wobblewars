@@ -66,8 +66,8 @@ _ADDFILES	:=	-d $(NITRO_FILES)
 #---------------------------------------------------------------------------------
 TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source source/Managers
-INCLUDES	:=	include source/Managers
+SOURCES		:=	source source/Managers source/Entities
+INCLUDES	:=	include source/Managers source/Entities
 DATA		:=	data
 NITRODATA	:=	nitrofiles
 
@@ -118,6 +118,12 @@ export NITRO_FILES	:=	$(CURDIR)/$(NITRODATA)
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+$(info ===== DEBUG INFO =====)
+$(info SOURCES: $(SOURCES))
+$(info CPPFILES: $(CPPFILES))
+$(info CURDIR: $(CURDIR))
+$(info Full paths: $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.cpp)))
+$(info ===== END DEBUG =====)
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
